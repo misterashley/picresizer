@@ -116,10 +116,15 @@ def process_images():
             if canvas: #apply a white background with the image centered
 ##                print('canvas')
                 if max(dimensions) < max(hero_dimensions):
+##                    print("teeny picture:"+filename)
                     canvas_image('"'+filename+'"',hero_dimensions[0],hero_dimensions[1],'"'+newfilename+'"')
                 elif max(dimensions) > max(max_dimensions):
+##                    print("biggy picture:"+filename)
                     canvas_image('"'+filename+'"',max_dimensions[0],max_dimensions[1],'"'+newfilename+'"')
+                elif dimensions[0]/dimensions[1]== max_dimensions[0]/max_dimensions[1]:
+##                    print('nothing to do here')
                 else:
+##                    print("normal picture:"+filename)
                     canvas_image('"'+filename+'"',max(dimensions),max(dimensions),'"'+newfilename+'"')
 
             if image_format: # convert to another format
