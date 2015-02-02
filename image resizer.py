@@ -4,7 +4,7 @@
 ## or grow images that are smaller than the hero image default.
 
 #user config
-bksource =r"C:\Users\mrashley\Google Drive\WebsiteImages\newtest" #the r is for 'raw' allowing \ 
+bksource =r"C:\Users\mrashley\Dropbox\XM Docs\Ennco\images" #the r is for 'raw' allowing \ 
 source = bksource.replace('\\','/')
 if source[-1] != '/':
 	source = source + '/'
@@ -72,10 +72,11 @@ def format_convert(filename,image_format):
 ##                print("same extension")
                 pass
             else:
-##                print("converted", filename, "to", file_and_ext[0] + image_format)
-                subprocess.call("convert " + filename + " -background white -flatten " + \
-                                file_and_ext[0] + image_format, startupinfo=si, shell=True)
-                counter['converted'] += 1
+##                print('convert "' + filename + '" -background white -flatten "' + file_and_ext[0] + image_format + '"')
+
+                if subprocess.call('convert "' + filename + '" -background white -flatten ' + \
+                                file_and_ext[0] + image_format + '"', startupinfo=si, shell=True) : counter['converted'] += 1
+                #do the conversion, and if exits with process 0, then register this as converted.
                 pass #delete the old filename also, please
                     
         except:
