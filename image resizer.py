@@ -4,7 +4,7 @@
 ## or grow images that are smaller than the hero image default.
 
 #user config
-bksource =r"D:\BitTorrent Sync\ALL SEASONS IMAGES\new carhartt images" #the r is for 'raw' allowing \ 
+bksource =r"c:\files" #the r is for 'raw' allowing \ 
 source = bksource.replace('\\','/')
 if source[-1] != '/':
 	source = source + '/'
