@@ -21,12 +21,15 @@ force_to_hero_size = True
 #False means we will only resize large images
 canvas = True
 
-quality_percent = 85  #jpg percent quality // set quality_percent to 0 (zero) to disable.... %92 is pretty good, %85 is okay.
+quality_percent = 85  #jpg percent quality // set quality_percent to 0 (zero) to disable.
+#%92 is pretty good, %85 is okay.
 
-strip = True #strip exif tag // True to enable, False to disable
+strip = True #strip exif tag // True to enable, False to disable.
+#This will make the files sometimes quite a bit smaller
 
-image_format = ".jpg" #False for no conversion, or ".jpg", ".png", ".gif"
+image_format = False # ".jpg" #False for no conversion, or ".jpg", ".png", ".gif"
 #string of ".jpg" or ".png" or ".gif" to convert files to this format.
+#this is problematic at times...
 
 resize = True #False for no resize
 
