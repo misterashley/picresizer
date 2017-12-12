@@ -51,15 +51,20 @@ si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
 ##################################################################################
 ## Pseudo code
 ##################################################################################
-##  Set intentions:
+
+## The reason for this version is to use all the modules to create a set of
+## arguments, which will then be executed in as few commands as possible,
+## rather than a command for each step, which is inefficient.
+
+##  Setup output images intentions:
 ##      hero size
 ##      force resize up to hero? y/n
 ##      max size
 ##  	resize down to max y/n
-##  	image canvas y/n
+##  	add image canvas y/n
 ##  	jpg quality %
 ##      jpg compress progressive y/n
-##  	strip y/n
+##  	strip EXIF data from image y/n
 ##  	debugging report y/n
 ##  	convert to jpg y/n
 ##      leave_as_png y/n
