@@ -43,8 +43,50 @@ from PIL import Image
 global counter
 counter = dict(touched=0, grown=0, shrunk=0, canvased=0, converted=0, stripped=0, adj_qual=0)
 
+
+## This is to hide the command line form appearing during operations
 si = subprocess.STARTUPINFO()
-si.dwFlags |= subprocess.STARTF_USESHOWWINDOW # this is to hide the command line
+si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+
+##################################################################################
+## Pseudo code
+##################################################################################
+##  Set intentions:
+##      hero size
+##      force resize up to hero? y/n
+##      max size
+##  	resize down to max y/n
+##  	image canvas y/n
+##  	jpg quality %
+##      jpg compress progressive y/n
+##  	strip y/n
+##  	debugging report y/n
+##  	convert to jpg y/n
+##      leave_as_png y/n
+##  
+##  for file in folder:
+##  	find extension
+##  		if jpg, png, bmp, tif, gif:
+##                      get image dimensions
+##                      get filetype. verify to extension.. ?
+##  		if other: tell user not an image, move to the next file
+
+##      determine arguments
+##              if 
+
+##      if source image is png:
+##              if convert to jpg:
+##                      if leave_as_png: pass
+##                      append arg to flatten alpha channel
+##              
+##      else:
+##              does image need converting to jpg? y/n
+##              does image need shrinking to max? y/n
+##              does image need growing to hero? y/n
+##      run convert with args.
+	
+
+
 
 def get_image_dimensions(filename):
     try:
