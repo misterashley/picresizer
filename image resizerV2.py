@@ -76,8 +76,11 @@ si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
 ##                      get filetype. verify to extension.. ?
 ##  		if other: tell user not an image, move to the next file
 
-##      determine arguments
-##              if 
+##      determine arguments:
+##              if shrink
+##		if grow
+##		if stretch
+##
 
 ##      if source image is png:
 ##              if convert to jpg:
