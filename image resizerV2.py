@@ -10,30 +10,37 @@ if source[-1] != '/':
 	source = source + '/'
 #source = "C:/Users/mrashley/Dropbox/Photos for website/" # must have trailing /
 
-max_dimensions = (1000,1000)
-hero_dimensions = (400,400)
-#force_hero_size
+max_dimensions = (1000,1000) #maximum image size
+
+hero_dimensions = (400,400) #minimum image size
+
+force_to_hero_size = False
 #True means we will upsize the image's largest edge a hero dimension
 #False means we will leave the image at it's native size
-force_to_hero_size = False
-#put_on_canvas
+
+canvas = False
 #True means we will put the image on a canvas for a consistent image ratio
 #False means we will only resize large images
-canvas = False
 
-quality_percent = 85  #jpg percent quality // set quality_percent to 0 (zero) to disable.
+quality_percent = 85
+#jpg percent quality // set quality_percent to 0 (zero) to disable.
 #%92 is pretty good, %85 is okay.
 
-strip = True #strip exif tag // True to enable, False to disable.
+strip = True
+#strip exif tag // True to enable, False to disable.
 #This will make the files sometimes quite a bit smaller
 
-image_format = ".jpg" #False for no conversion, or ".jpg", ".png", ".gif"
-#string of ".jpg" or ".png" or ".gif" to convert files to this format.
-#this is problematic at times...
+image_to_jpg = False
+#False for no conversion
+#True to convert images to .jpg
 
-resize = False #False for no resize
+resize = False
+#False for no resize at all
+#True to allow image resizing
 
-reporting = False #False for minor reporting. True for lots of reporting
+reporting = False
+#True to show command as they're created
+#False for no commands
 
 #----------------------- no config below this -----------------
 
@@ -77,60 +84,42 @@ si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
 
 ##  
 ##  def file_convert(imageFilename, newImageFilename, *Arguments):
-##      if Arguments: 
-##
+##      command = file + " "
+##      while Arguments:
+##              command = command + Arguments.pop() + " "
+##      command = command + newImageFilename
+##      if debuging_report: print(command)
+##      CliCall(command)
 
-##########################################################################
-###############################MAIN PROGRAM###############################
-##########################################################################
+
+##def professFiles():
+##   ##########################   MAIN PROGRAM   ##################
+##  clear Arguments[]
 ##  for file in folder:
-##  	find extension
-##  	        if jpg, png, bmp, tif, gif:
+##  	find extension:
+##  	        if extension is jpg, png, bmp, tif, gif:
 ##                      if verifyExtensions(file,extension):
 ##                              get image dimensions
 ##                              if embiggen AND dimensions < hero size: Arguments.add(embiggen_argument)
 ##                              if shrinken AND dimensions > max_size: Arguments.add(shrinken_argument)
 ##                              if canvasen: Arguments.add(canvasen_argument)
 ##                              if strip_exif: Arguments.add(strip_exif_argument)
-##                              
-##                              if extension is jpg:
+##                              if convert_to_jpg or extension is jpg:
 ##                                      if jpg_quality: Arguments.add(jpg_quality_argument)
 ##                                      if jpg_progressive: Arguments.add(jpg_progressive_argument)
-##                              if extension is png:
+##                              if extension is png and convert_to_jpg:
+##                                      if exempt_png_from_jpg_conversion:pass
+##                                      else: Arguments.add(png_to_jpg_alpha_argument)
 ##                                      
-##
 ##                      else: print("It looks like this file isn't right.")
-##
-##
-##
-##
-##
-##                      if the filetype (not extension) is jpg:
-##                             add jpg arguement
-##                      if the filetype is png:
-##                        
-
-##              elif jpg:
-##              elif png: 
 ##  		if other: tell user not an image, move to the next file
-
-##      determine arguments:
-##              if shrink
-##		if grow
-##		if stretch
-##
 
 ##      if source image is png:
 ##              if convert to jpg:
 ##                      if leave_as_png: pass
-##                      append arg to flatten alpha channel
-##              
-##      else:
-##              does image need converting to jpg? y/n
-##              does image need shrinking to max? y/n
-##              does image need growing to hero? y/n
-##      run convert with args.
-	
+##                      else:
+##                              png to jpg PIL call
+##              	        change source file to be newly created jpg file ##hacky.. i don't like this solution###
 
 
 
@@ -139,6 +128,10 @@ def get_image_dimensions(filename):
         img = Image.open(filename) # get the image's width and height in pixels
         width, height = img.size #find image dimensions of file or return error
         return (width, height)
+        # report ratio if you like
+        # from fractions import gcd
+        # greatest_common_denom = gcd (1000, 1000)
+        # then divide each variable by greatest_common_denom
     except IOError: print(filename,"is not an image.")
 
 def shrink_to_bounds(filename,width,height,newfilename):
@@ -280,7 +273,7 @@ if __name__ == "__main__":
 ##    resize images - do we want to stretch out images smaller than the hero size?
     os.chdir(source)
     print("Working in",str(os.getcwd()))
-    process_images()
+    process_files()
     print("Finished. Going up a level.")
     os.chdir("..") #change director to up one level, so the directory is unlocked
 
