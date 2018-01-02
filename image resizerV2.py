@@ -58,22 +58,60 @@ si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
 
 ##  Setup output images intentions:
 ##      hero size
-##      force resize up to hero? y/n
+##      force resize of small images up to hero? y/n (embiggen)
 ##      max size
-##  	resize down to max y/n
+##  	resize down to max y/n (shrinken)
 ##  	add image canvas y/n
 ##  	jpg quality %
 ##      jpg compress progressive y/n
 ##  	strip EXIF data from image y/n
-##  	debugging report y/n
 ##  	convert to jpg y/n
-##      leave_as_png y/n
+##      exempt_png_from_jpg_conversion y/n #if convert to jpg, do we want to leave png
+##  	debugging report y/n
+
+##      global Arguments[]
+##      ##These are the arguments that we'll .append which will go between filenames 
+
+##  def verifyExtension(file,extension):
+##      return(file matches extension)
+
 ##  
+##  def file_convert(imageFilename, newImageFilename, *Arguments):
+##      if Arguments: 
+##
+
+##########################################################################
+###############################MAIN PROGRAM###############################
+##########################################################################
 ##  for file in folder:
 ##  	find extension
-##  		if jpg, png, bmp, tif, gif:
-##                      get image dimensions
-##                      get filetype. verify to extension.. ?
+##  	        if jpg, png, bmp, tif, gif:
+##                      if verifyExtensions(file,extension):
+##                              get image dimensions
+##                              if embiggen AND dimensions < hero size: Arguments.add(embiggen_argument)
+##                              if shrinken AND dimensions > max_size: Arguments.add(shrinken_argument)
+##                              if canvasen: Arguments.add(canvasen_argument)
+##                              if strip_exif: Arguments.add(strip_exif_argument)
+##                              
+##                              if extension is jpg:
+##                                      if jpg_quality: Arguments.add(jpg_quality_argument)
+##                                      if jpg_progressive: Arguments.add(jpg_progressive_argument)
+##                              if extension is png:
+##                                      
+##
+##                      else: print("It looks like this file isn't right.")
+##
+##
+##
+##
+##
+##                      if the filetype (not extension) is jpg:
+##                             add jpg arguement
+##                      if the filetype is png:
+##                        
+
+##              elif jpg:
+##              elif png: 
 ##  		if other: tell user not an image, move to the next file
 
 ##      determine arguments:
