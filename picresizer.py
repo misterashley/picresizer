@@ -45,7 +45,19 @@ button1 = Button (window, text ="Choose a folder", width=20, command=browse_butt
 button1.pack(pady=10)
 #button1.grid(row=3, column=0, sticky=W)
 
+#Checkbox for Resize
 
+#Max dimension height
+
+#Max dimension width
+
+#Checkbox for force to hero size
+
+#Checkbox for canvas addition
+
+#Checkbox for strip EXIF tag
+
+#Checkbox for reporting (debugging)
 
 ### run the main loop
 window.mainloop()
