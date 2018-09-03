@@ -1,0 +1,47 @@
+Components
+
+Graphical User interface (GUIgoodness.py)
+- Simple GUI
+    - File selector and each option laid out in order of this document
+    - Progress bar and progress text field
+    - (Stretch goal) Show the list of selected files
+        - Each file is verified as a valid input image format
+        - Show a plan based on the selected options
+        - Completed conversion notation
+- File selector
+    - Choose a folder
+        - Option to delve into subfolders
+    - Choose a file
+- Options
+    - Maximum desired output image dimension (Desired ratio is a function of max output)
+    - Minimum desired output image dimensions
+    - Resize images
+    - Canvas enabled
+    - Canvas colour ? (Hex value, colour wheel perhaps)
+    - Compression enabled / percent
+    - Strip EXIF data to shrink filesize
+    - Convert to .JPG
+        - Delete original image upon successful conversion
+    - Preserve .PNG images in that format
+    - Debug to console
+
+Image scan & planned work  (scanNplan.py)
+    - Review files and build a queue of planned work (write to disk in compressed format?)
+        - Enlarge
+        - Shrink
+        - Canvas (plus colour?)
+        - Preserve PNG format
+            -Valid input image format: PNG
+        - Convert to JPG
+            - Valid input image formats: BMP, TIFF, JPG, PNG, GIF, RAW?
+            - GIF and PNG may have transparent backgrounds, convert to white and flatten
+    - (Stretch goal) Show what work is to be done
+
+
+Work execution  (werkwerkwerk.py)
+    - Execute the queue of jobs
+        - Resize, canvas, convert each image in as efficiently as possible
+        - Show progress updates on UI in a timely fashion
+
+Default configuration (defaults.conf)
+    - Set default options

@@ -1,0 +1,18 @@
+This software has a particular purpose in mind, to convert and resize images to a more homogeneous format for posting to a webstore or online catalogue. 
+
+Acknowledging that it's possible to have the online tool prepare images for presentation, the reality is that this isn't always an option. This software is designed to bridge the shortfall where needed.
+
+With this in mine, the software will:
+- convert images to JPG format (or remain in PNG format as desired)
+- allow user to set a height to width ratio for all images to follow
+- allow images to be placed on a white canvas (background) to fill out their dimensions
+- allow user to set minimum size
+    - and either stretch the image to the minimum size if below, 
+    - or apply a canvas grow the image
+- allow user to set a maximum size
+- allow images to be compressed
+- allow images to be stripped of EXIF data to reduce file size
+
+Personal goals of this software:
+- create a simple and straightforward interface
+- as much as possible detach the user controls from the underlying 
