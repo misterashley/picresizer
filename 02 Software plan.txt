@@ -12,7 +12,7 @@ Graphical User interface (GUIgoodness.py)
     - Choose a folder
         - Option to delve into subfolders
     - Choose a file
-- Options
+- Options (set globally)
     - Maximum desired output image dimension (Desired ratio is a function of max output)
     - Minimum desired output image dimensions
     - Resize images

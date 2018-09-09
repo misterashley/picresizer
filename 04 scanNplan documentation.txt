@@ -18,6 +18,9 @@ def checkimage_dimensions(file):
     else: "not a supported image type"
 
 
+
+---notes---
+
 to get path.
 from pathlib import Path
 p = Path('docs')

@@ -1,6 +1,6 @@
 For the moment, the config document (default.conf) will replace the GUIs functionality.
 
-Here we'll choose settings, and files or a folder. The files or folder chosen will be passed to the scanNplan module along with settings.
+Here we'll choose settings, and files or a folder. The files or folder chosen will be passed to the scanNplan. Global settings read.
 
 ScanNplan will return a list of validated files the options for those files.
 
@@ -32,3 +32,8 @@ This creates another list of validated files + options applicatable to the file.
 GUIgoodness interactions with werkwerkwerk:
 
 Sends a single valided file + options ("VFO") entry to the werking module. This will process the image, and if desired, delete the original.
+
+
+---VFO Format---
+List (filename with full path; "in/valid"; dimensions; image format)
+
