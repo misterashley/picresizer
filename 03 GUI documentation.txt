@@ -1,0 +1,7 @@
+This is where everything begins.
+
+Incidentally this is also what the config file will replicate. Kinda.
+
+So we'll set all of our settings, and then we'll choose some files. The files chosen will be passed to the scanNplan module. The options will also be passed.
+
+

@@ -1,0 +1,21 @@
+This is the new part. I think this will be the hardest bit.
+
+We want to take options from the GUIgoodness so we know what we're gonna do with the files.
+
+The big part is that we're going to take a file list from GUIgoodness.
+
+The tricky part here is passing back some stuff to the GUI, as we're doing it. I'm happy to check in after every file, but I think the scanNplan has got to do two steps.
+
+Scanning the files one at a time, and returning a second list with the logic we're going to ask of the werkwerkwerk module.
+
+to get path.
+from pathlib import Path
+p = Path('docs')
+
+for child in p.iterdir(): child.is_file() shows true or false.
+
+or if child.is_file(): try getting it's dimensions.
+
+
+
+[child for child in p.iterdir() if child.is_dir()]
