@@ -1,7 +1,34 @@
-This is where everything begins.
+For the moment, the config document (default.conf) will replace the GUIs functionality.
 
-Incidentally this is also what the config file will replicate. Kinda.
+Here we'll choose settings, and files or a folder. The files or folder chosen will be passed to the scanNplan module along with settings.
 
-So we'll set all of our settings, and then we'll choose some files. The files chosen will be passed to the scanNplan module. The options will also be passed.
+ScanNplan will return a list of validated files the options for those files.
 
+GUIgoodness input
 
+    From defaults:
+    - All the options set out in 02 Software plan
+
+    From the user:
+    -Modifications to the default configuration options
+    -Folder selection including an option to work on subfolders OR
+    -A file or selection of files
+
+GUIgoodness output user
+
+    Show a "completed files/all files" status bar, updated at least every several seconds.
+
+    STRETCH GOAL
+    Show what is to be done to each of the files. Perhaps a grid "shrink(-), grow(+), leave", t
+
+GUIgoodness interactions with scanNplan:
+
+    GUIgoodness passes a file or folder to scanNplan and gets back: "in/valid image"; original dimensions; delete original file y/n; preserve PNG format y/n;
+
+STRETCH: original image format compression?
+
+This creates another list of validated files + options applicatable to the file. ("VFO")
+
+GUIgoodness interactions with werkwerkwerk:
+
+Sends a single valided file + options ("VFO") entry to the werking module. This will process the image, and if desired, delete the original.

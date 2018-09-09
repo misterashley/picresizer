@@ -1,12 +1,22 @@
-This is the new part. I think this will be the hardest bit.
+We want to take a selection of file, files, folder or folders from GUIgoodness and return a list of the file is an image. Return "valid" and image dimensions, or "invalid".
 
-We want to take options from the GUIgoodness so we know what we're gonna do with the files.
+From GUIgoodness get a list of files or folder, and some options.
 
-The big part is that we're going to take a file list from GUIgoodness.
+Returns: a list of VFO (validated files + options) entries including full file path; "in/valid image"; original dimensions; delete original file True/False; preserve PNG format True/False;
 
-The tricky part here is passing back some stuff to the GUI, as we're doing it. I'm happy to check in after every file, but I think the scanNplan has got to do two steps.
+LOGIC
+    For file_or_folder in passed_files:
+        if file.is_file():
+            VFO_Entry = checkimage(file) #dimension, imageformat
+        if file.is_dir():
+#           worryabout recursive directory scan later.
+#           recursive_scan = False: #if recursive is not set, turn it off, your first directory is free.
+            enter directory generate a new list of files, and pass to file checker and check each file.
 
-Scanning the files one at a time, and returning a second list with the logic we're going to ask of the werkwerkwerk module.
+def checkimage_dimensions(file):
+    try to return: image dimension, image format
+    else: "not a supported image type"
+
 
 to get path.
 from pathlib import Path
