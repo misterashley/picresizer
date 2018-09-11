@@ -24,12 +24,13 @@ Graphical User interface (GUIgoodness.py)
         - Delete original image upon successful conversion
     - Preserve .PNG images in that format
     - Debug to console
+- Launch
+    - Start the process
 
 Image scan & planned work  (scanNplan.py)
     - Review file, files, folder, or folders. Every file is returned as a VFO entry (validated file, and options), including invalid files.
     - The list of returned entries is the basis for the werkwerkwerk module.
     - (Stretch goal) Show what work is to be done
-
 
 Work execution  (werkwerkwerk.py)
     - For each VFO entry perform work based on configuration

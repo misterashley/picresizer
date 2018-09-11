@@ -1,4 +1,4 @@
-For the moment, the config document (default.conf) will replace the GUIs functionality.
+For the moment, the config document (default.conf) will replace the GUI supplying the options.
 
 Here we'll choose settings, and files or a folder. The files or folder chosen will be passed to the scanNplan. Global settings read.
 

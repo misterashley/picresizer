@@ -36,6 +36,9 @@ from PIL import Image
 global counter
 counter = dict(touched=0, grown=0, shrunk=0, canvased=0, converted=0, stripped=0, adj_qual=0)
 
+def scanthis(folder):
+    print(folder)
+
 def get_image_dimensions(filename):
     try:
         img = Image.open(filename) # get the image's width and height in pixels
