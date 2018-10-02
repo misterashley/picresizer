@@ -30,8 +30,10 @@
 
     
 
-import os, sys, subprocess
-#import shutil
+import os
+import threading
+import time #for timing purposes
+start_time = time.time()# for timing purposes
 from PIL import Image
 global counter
 counter = dict(touched=0, grown=0, shrunk=0, canvased=0, converted=0, stripped=0, adj_qual=0)
@@ -52,17 +54,25 @@ def validate_image_dimensions(file_to_check):
         return (file_to_check, width, height)
     except IOError: pass # print(file_to_check,"is not an image.")
 
-
-if __name__ == "__main__":
-    working_folder = "/home/mrashley"
-    files_to_check = find_files(working_folder)
-    print("Remaining files to check:",str(len(files_to_check)))
-    image_files = []
+def pop_and_check():
     while len(files_to_check) > 0:
         possible_image = []
         possible_image = (validate_image_dimensions(files_to_check.pop()))
         if possible_image != None: image_files.append(possible_image)
-##        elif len(files_to_check) % 1000:
-##            print(str(len(files_to_check)
-##        else:pass
-##                  
+
+if __name__ == "__main__":
+    working_folder = "/home/mrashley/"
+    global files_to_check
+    files_to_check = find_files(working_folder)
+    print("Remaining files to check:",str(len(files_to_check)))
+    global image_files
+    image_files = []
+##    while threading.active_count() < maxthreads:
+    vi = threading.Thread(target=pop_and_check)
+    vi.start()
+    #vi.join() #don't bother waiting...
+    #pop_and_check()
+    
+    print("-----%s seconds----" % (time.time() - start_time))
+    
+    
