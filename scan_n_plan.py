@@ -31,7 +31,7 @@
     
 
 import os
-import threading
+##import threading
 import time #for timing purposes
 start_time = time.time()# for timing purposes
 from PIL import Image
@@ -55,11 +55,12 @@ def validate_image_dimensions(file_to_check):
     except IOError: pass # print(file_to_check,"is not an image.")
 
 def pop_and_check():
+    # Check if the files are images
     while len(files_to_check) > 0:
         possible_image = []
         possible_image = (validate_image_dimensions(files_to_check.pop()))
         if possible_image != None: image_files.append(possible_image)
-
+    
 if __name__ == "__main__":
     working_folder = "/home/mrashley/"
     global files_to_check
@@ -67,12 +68,8 @@ if __name__ == "__main__":
     print("Remaining files to check:",str(len(files_to_check)))
     global image_files
     image_files = []
-##    while threading.active_count() < maxthreads:
-    vi = threading.Thread(target=pop_and_check)
-    vi.start()
-    #vi.join() #don't bother waiting...
-    #pop_and_check()
-    
-    print("-----%s seconds----" % (time.time() - start_time))
-    
+    pop_and_check()
+    print("Image files found:",len(image_files))
+    print("-----%s seconds----" % (time.time() - start_time)) #for timing purposes
+
     
