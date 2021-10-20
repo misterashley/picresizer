@@ -42,8 +42,8 @@ def find_files(folder):
     found_files = []
 ##    os.chdir(folder)
     for root, dirs, files in os.walk(folder, topdown = False):
-       for name in files:
-          found_files.append(os.path.join(root, name))
+        for name in files:
+            found_files.append(os.path.join(root, name))
     return found_files
 
 def validate_image_dimensions(file_to_check):
@@ -53,6 +53,19 @@ def validate_image_dimensions(file_to_check):
 ##        print(file_to_check, width, height)
         return (file_to_check, width, height)
     except IOError: pass # print(file_to_check,"is not an image.")
+
+def check_image_dims(files):
+    if isinstance(files,list):
+        for file in files:
+            print(file)
+            try:
+                img = Image.open(file)
+                width, height = img.size
+                #print(file_to_check, width, height)
+                #return (file_to_check, width, height)
+            except IOError: print(file_to_check,"is not an image.")
+    else: print("not a list")
+
 
 def pop_and_check():
     # Check if the files are images
@@ -65,6 +78,7 @@ if __name__ == "__main__":
     working_folder = "/home/mrashley/"
     global files_to_check
     files_to_check = find_files(working_folder)
+    print("Remaining files to check:",str(len(files_to_check)))
     print("Remaining files to check:",str(len(files_to_check)))
     global image_files
     image_files = []

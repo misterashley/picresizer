@@ -1,8 +1,9 @@
 import os
 from tkinter import filedialog # For browsing to the directory with tkinter directory chooser
-from tkinter import *
+#from tkinter import *
+import tkinter as tk
 from time import sleep # for update_idletasks
-import scan_n_plan
+import scan_n_plan, werkwerkwerk
 
 def analyse_folder_of_files():
 	pass
@@ -19,34 +20,44 @@ def browse_button():
 ##        sleep(1)
 ##        print(selected_directory.get())
 
-def scan(selected_directory):
-        doing = "doing it!"
+def scan():
+        statusMessage.set("Getting list of files...")
+        global list_of_images
+        list_of_images = scan_n_plan.find_files(selected_directory.get())
+        statusMessage.set("Looking at the files...")
+        scan_n_plan.check_image_dims(list_of_images)
+        #print(selected_directory.get())
+        #statusMessage.set("...")
+
+
 
 #### main:
-window = Tk()
+window = tk.Tk()
 window.title("picResizer")
 window.configure(background="white")
 
 global selected_directory
-selected_directory = StringVar(window)
-selected_directory.set(os.getcwd())
+selected_directory = tk.StringVar()
+#selected_directory.set(os.getcwd())
+selected_directory.set("Choose a folder to scan.")
 print(selected_directory.get())
-doing = ''
+statusMessage = tk.StringVar()
+statusMessage.set("...")
 #selected_folder = selected_directory.get()
 
 ### get the path
-label1 = Label (window, text = "Paste the path of files to process", bg="white", fg="black", font="none 12")
+label1 = tk.Label (window, text = "Find the file folder of images to convert.", bg="white", fg="black", font="none 12")
 label1.pack(pady=10)
 #label1.grid(row=1, column=0, sticky=W)
 
 ## Selected directory
-labelPath = Label (window, textvariable = selected_directory, bg ="white", fg="black", font="none 12")
+labelPath = tk.Label (window, textvariable = selected_directory, bg ="white", fg="blue", font="none 10")
 #label2 = Label (window, text = "Current folder: \n" + selected_directory.get(), bg ="white", fg="black", font="none 12")
 labelPath.pack(pady=10, padx=5)
 #label2.grid(row=2, column=0, sticky=W)
 
 ### Choose one more folders or files
-buttonChoose = Button (window, text ="Choose a folder", width=20, command=browse_button)
+buttonChoose = tk.Button (window, text ="Choose a folder", width=20, command=browse_button)
 buttonChoose.pack(pady=10)
 #button1.grid(row=3, column=0, sticky=W)
 
@@ -65,12 +76,12 @@ buttonChoose.pack(pady=10)
 #Checkbox for reporting (debugging)
 
 ### run the main loop
-buttonRun = Button (window, text = "Zhu Li, do the thing!", width=20, command=scan(selected_directory))
+buttonRun = tk.Button (window, text = "Zhu Li, do the thing!", width=20, command=scan)
 buttonRun.pack(pady=15)
 
-labelDoing = Label (window, textvariable = doing, bg ="white", fg="black", font="none 12")
+labelStatusMessage = tk.Label (window, textvariable = statusMessage, bg ="white", fg="black", font="none 12")
 #label2 = Label (window, text = "Current folder: \n" + selected_directory.get(), bg ="white", fg="black", font="none 12")
-labelDoing.pack(pady=10, padx=5)
+labelStatusMessage.pack(pady=10, padx=5)
 
 
 window.mainloop()
