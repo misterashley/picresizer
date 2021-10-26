@@ -16,15 +16,20 @@ def browse_button():
         selected_directory.set(filedialog.askdirectory())
 ##trying to get the label to update.
         window.update_idletasks()
-##        sleep(1)
-##        print(selected_directory.get())
+        #global files_to_check
         files_to_check = scan_n_plan.find_files(selected_directory.get())
-        statusMessage.set("Looking at "+ str(len(files_to_check))+" files...")
-        print(files_to_check)
-        #image_files = scan_n_plan.pop_and_check(files_to_check)
-        #scan_n_plan.check_image_dims(list_of_images)
-        scan_n_plan.return_images_with_dimensions(files_to_check)
-        statusMessage.set(str(len(scan_n_plan.image_files)) + " image(s) found.")
+        image_files = []
+        #print(type(files_to_check))
+        #print(len(files_to_check))
+        while len(files_to_check) > 0:
+                statusMessage.set("Looking at "+ str(len(files_to_check))+" files...")
+                #print(files_to_check)
+                #image_files = scan_n_plan.pop_and_check(files_to_check)
+                #scan_n_plan.check_image_dims(list_of_images)
+                files_to_check, image_files = scan_n_plan.create_list_of_images_from_file_list(files_to_check, image_files)
+                statusMessage.set(str(len(image_files)) + " images found. " + str(len(files_to_check)) + " files remaining.")
+                window.update_idletasks()
+        statusMessage.set(str(len(image_files)) + " image(s) found.")
 
 def scan():
         if selected_directory.get() == '':
@@ -39,14 +44,15 @@ global selected_directory
 selected_directory = tk.StringVar()
 #selected_directory.set(os.getcwd())
 #selected_directory.set("Choose a folder to scan.")
-print(selected_directory.get())
+#print(selected_directory.get())
+global statusMessage
 statusMessage = tk.StringVar()
-statusMessage.set("...")
+#statusMessage.set("...")
 #selected_folder = selected_directory.get()
 
 ### get the path
 label1 = tk.Label (window, text = "Find the file folder of images to convert.", bg="white", fg="black", font="none 12")
-label1.pack(pady=10)
+label1.pack(pady=10,padx=30)
 #label1.grid(row=1, column=0, sticky=W)
 
 ## Selected directory

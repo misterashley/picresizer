@@ -5,14 +5,11 @@ from PIL import Image
 si = subprocess.STARTUPINFO()
 si.dwFlags |= subprocess.STARTF_USESHOWWINDOW # this is to hide the command line
 
-
-
 def shrink_to_bounds(filename,width,height,newfilename):
     argument = str("convert " + filename + ' -resize '+str(width)+'x'+str(height)+' '+ newfilename)
     if reporting: print("Shrinking: " + argument)
     subprocess.call(argument, startupinfo=si, shell=True)
     counter['shrunk'] += 1
-
 
 def grow_to_bounds(filename,width,height,newfilename):
     argument = str("convert " + filename + ' -resize '+str(width)+'x'+str(height)+' '+newfilename) 
@@ -129,11 +126,7 @@ def process_images():
                     strip_exif(filename,newfilename)
             if quality_percent:
                     if reporting: print("quality set to %",quality_percent)
-                    set_image_quality(filename,quality_percent,newfilename)
-                
-                
-
+                    set_image_quality(filename,quality_percent,newfilename)          
         
         except Exception as e: print(str(e))
-
     print(counter)

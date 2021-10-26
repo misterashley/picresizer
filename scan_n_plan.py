@@ -35,8 +35,8 @@ start_time = time.time()# for timing purposes
 from PIL import Image
 global counter
 counter = dict(touched=0, grown=0, shrunk=0, canvased=0, converted=0, stripped=0, adj_qual=0)
-global image_files
-image_files = []
+#global image_files
+#image_files = []
 
 
 def find_files(folder):
@@ -67,14 +67,18 @@ def check_image_dims(files):
             except IOError: print(file_to_check,"is not an image.")
     else: print("not a list")
 
-def return_images_with_dimensions(file_list):
-    global image_files
-    # Check if a file is an image. If so return file path & image dimensions.
-    while len(file_list) > 0:    
+def create_list_of_images_from_file_list(files,images):
+    for i in range (1000):
+        # Check if a file is an image. If so, store the file path & image dimensions.
+        if len(files) == 0 :break
         this_image = []
-        this_image = (validate_image_dimensions(file_list.pop()))
-        if this_image != None: image_files.append(this_image)
-  
+        this_image = (validate_image_dimensions(files.pop()))
+        #this_image = (validate_image_dimensions(file_list.pop()))
+        if this_image != None: images.append(this_image)
+            #print(dir())
+            #window.statusMessage.set(str(len(file_list)))
+    return(files,images)
+
 def pop_and_check(files_to_check):
     global image_files
     #image_files = []
