@@ -66,6 +66,7 @@ def PIL_transPNG_to_jpg(img,filename,target_ext):
 def reduce_filesize(filename,filesize):
         #to define max file size "convert file.jpg -define jpeg:extent:500KB newfile.jpg"
     pass
+
 def strip_exif(filename,newfilename):
     argument = str('convert "'+ filename + '" -strip "' + newfilename + '"')
     if reporting: print(argument)

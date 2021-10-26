@@ -3,11 +3,10 @@ from tkinter import filedialog # For browsing to the directory with tkinter dire
 #from tkinter import *
 import tkinter as tk
 from time import sleep # for update_idletasks
-import scan_n_plan, werkwerkwerk
+import scan_n_plan #werkwerkwerk
 
 def analyse_folder_of_files():
 	pass
-
 
 def close_window():
     window.destroy()
@@ -19,27 +18,27 @@ def browse_button():
         window.update_idletasks()
 ##        sleep(1)
 ##        print(selected_directory.get())
+        files_to_check = scan_n_plan.find_files(selected_directory.get())
+        statusMessage.set("Looking at "+ str(len(files_to_check))+" files...")
+        print(files_to_check)
+        #image_files = scan_n_plan.pop_and_check(files_to_check)
+        #scan_n_plan.check_image_dims(list_of_images)
+        scan_n_plan.return_images_with_dimensions(files_to_check)
+        statusMessage.set(str(len(scan_n_plan.image_files)) + " image(s) found.")
 
 def scan():
-        statusMessage.set("Getting list of files...")
-        global list_of_images
-        list_of_images = scan_n_plan.find_files(selected_directory.get())
-        statusMessage.set("Looking at the files...")
-        scan_n_plan.check_image_dims(list_of_images)
-        #print(selected_directory.get())
-        #statusMessage.set("...")
+        if selected_directory.get() == '':
+                statusMessage.set("Please select a folder first.")
+                return
 
-
-
-#### main:
 window = tk.Tk()
 window.title("picResizer")
-window.configure(background="white")
+window.configure(background="yellow")
 
 global selected_directory
 selected_directory = tk.StringVar()
 #selected_directory.set(os.getcwd())
-selected_directory.set("Choose a folder to scan.")
+#selected_directory.set("Choose a folder to scan.")
 print(selected_directory.get())
 statusMessage = tk.StringVar()
 statusMessage.set("...")
@@ -76,7 +75,7 @@ buttonChoose.pack(pady=10)
 #Checkbox for reporting (debugging)
 
 ### run the main loop
-buttonRun = tk.Button (window, text = "Zhu Li, do the thing!", width=20, command=scan)
+buttonRun = tk.Button (window, text = "Process images", width=20, command=scan)
 buttonRun.pack(pady=15)
 
 labelStatusMessage = tk.Label (window, textvariable = statusMessage, bg ="white", fg="black", font="none 12")
