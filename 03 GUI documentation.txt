@@ -27,13 +27,15 @@ GUIgoodness interactions with scanNplan:
 
 STRETCH: original image format compression?
 
-This creates another list of validated files + options applicatable to the file. ("VFO")
+This creates another list of validated files + options applicable to the file. ("VFO")
 
 GUIgoodness interactions with werkwerkwerk:
 
 Sends a single valided file + options ("VFO") entry to the werking module. This will process the image, and if desired, delete the original.
 
-
 ---VFO Format---
-List (filename with full path; "in/valid"; dimensions; image format)
+List (filename of validated image with full path; 
+	width; 
+	height; 
+	image format as detected, rather than by extension;)
 

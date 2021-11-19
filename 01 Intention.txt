@@ -10,9 +10,9 @@ With this in mine, the software will:
     - and either stretch the image to the minimum size if below, 
     - or apply a canvas grow the image
 - allow user to set a maximum size
-- allow images to be compressed
+- allow images to be compressed, using JPG or PNG
 - allow images to be stripped of EXIF data to reduce file size
 
 Personal goals of this software:
 - create a simple and straightforward interface
-- as much as possible detach the user controls from the underlying 
+- as much as possible detach the user controls from the underlying stuff.

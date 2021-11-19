@@ -1,6 +1,6 @@
-We want to take a selection of file, files, folder or folders from GUIgoodness and return a list of the file is an image. Return "valid" and image dimensions, or "invalid".
+We want to take a selection of file, files, folder or folders (from GUIgoodness) and return a list. If we provide a folder we can choose to go recursive or not.
 
-From GUIgoodness get a list of files or folder, and some options.
+We return a list of lists. Each entry is an image filename, including path, and the image's dimensions. Example: ("c:/dir/image.jpg", 1040, 800)
 
 Returns: a list of VFO (validated files + options) entries including full file path; "in/valid image"; original dimensions; delete original file True/False; preserve PNG format True/False;
 
