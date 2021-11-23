@@ -36,10 +36,13 @@ from PIL import Image
 global counter
 counter = dict()
 #counter = dict(touched=0, grown=0, shrunk=0, canvased=0, converted=0, stripped=0, adj_qual=0)
-#global image_files
-#image_files = []
-#from GUIgoodness import image_list
 
+global work_happening
+work_happening = False
+#work_happening = True
+
+global image_list
+image_list = []
 
 def find_files(folder):
     logging.info("scan_n_plan.find_files function started")
@@ -83,15 +86,15 @@ def find_files(folder):
 ##    else: print("not a list")
 
 # Check if a file is an image. If so, store the file path & image dimensions.
-def create_list_of_images_from_file_list(files_to_scan):
-    logging.info("scan_n_plan.create_list_of_images_from_file_list function started")
+def get_image_list_from_file_list(files_to_scan):
+    
+    #this is the list we'll populate. find it by referring to scan_n_plan.image_list
+    global image_list 
+    logging.info("scan_n_plan.get_image_list_from_file_list function started")
     
     # Check if there are any files, if none stop.
     if len(files_to_scan) == 0 :
         logging.info("There were " + str(len(files_to_scan))+ " files to scan.")
-    
-    global image_list
-    image_list = []
 
     for file in files_to_scan:
         this_image = []
@@ -109,11 +112,12 @@ def create_list_of_images_from_file_list(files_to_scan):
             break
     
     logging.info("Found " + str(len(image_list)) + " images from " + str(len(files_to_scan)) + " files.")
-    print(dir(turn_off_button_during_work.work_happening)
-    #print(str(turn_off_button_during_work.work_happening))
+    global work_happening
     logging.info("Work happening set to: " + str(work_happening))
-    work_happening = False
-    logging.info("scan_n_plan.create_list_of_images_from_file_list function ended")
+    time.sleep(1)
+    work_happening = "Pineapple" #Falsefuckity
+    logging.info("Work happening set to: " + str(work_happening))
+    logging.info("scan_n_plan.get_image_list_from_file_list function ended")
 
 ##def create_list_of_images_from_file_list(files_to_scan,images_found):
 ##    for i in range (1000):
@@ -135,7 +139,7 @@ def create_list_of_images_from_file_list(files_to_scan):
 ##        possible_image = []
 ##        possible_image = (validate_image_dimensions(files_to_check.pop()))
 ##        if possible_image != None: image_files.append(possible_image)
-    
+
 if __name__ == "__main__":
     #working_folder = "C://Users//Ashley//Documents//temp//images to test"
     #global files_to_check

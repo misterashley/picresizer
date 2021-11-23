@@ -10,10 +10,7 @@ import logging #to log errors
 #logging.WARNING for least info
 #logging.INFO for next amount
 #logging.DEBUG for verbose
-logging.basicConfig(filename='example.log', filemode='w', level=logging.DEBUG)
-
-#global image_list
-
+logging.basicConfig(filename='example.log', filemode='w', level=logging.INFO)
 
 def close_window():
     root.destroy()
@@ -66,39 +63,56 @@ def get_list_of_files_from_directory(directory):
 ##        status.set("Something unexpected happened!!")
     logging.info("get_list_of_images_from_directory function ended")
 
-def turn_off_button_during_work():
+def turn_off_button_during_scan():
     logging.info("turn_off_button_during_work function started")
     buttonProcessImages.config(state=DISABLED)
-    sleep(0.1)
-    #global work_happening
-    work_happening = True
-    print ("Work is happening? : " + str(work_happening))
-    while work_happening:
+    sleep(0.5)# a little pause to help multithreading be cool.
+    scan_n_plan.work_happening = True
+    while scan_n_plan.work_happening:
+        sleep(1)
+        print(".")
+        print(scan_n_plan.work_happening)
         pass
     buttonProcessImages.config(state=NORMAL)
     logging.info("turn_off_button_during_work function ended")
+
+def turn_off_button_during_work():
+    #global work_happening I don't think this does what I want it to do
+    logging.info("turn_off_button_during_work function started")
+    buttonProcessImages.config(state=DISABLED)
+    sleep(0.5)# a little pause to help multithreading be cool.
+    scan_n_plan.work_happening = True
+    while werkwerkwerk.work_happening:
+        sleep(1)
+        print(".")
+        print(werkwerkwerk.work_happening)
+        pass
+    buttonProcessImages.config(state=NORMAL)
+    logging.info("turn_off_button_during_work function ended")
+
 
 def scan_files_for_images_and_update_ui(files):
     logging.info("scan_files_for_images_and_update_ui function started")
     logging.info("The var was sent with " + str(len(files)) + " entries.")
 
     #disable process images button
-    user_interface = threading.Thread(target=turn_off_button_during_work)
+    user_interface = threading.Thread(target=turn_off_button_during_scan)
 
     #the work of checking which files are images
-    work = threading.Thread(target=lambda: scan_n_plan.create_list_of_images_from_file_list(files))
+    work = threading.Thread(target=scan_n_plan.get_image_list_from_file_list(files))
 
     #start both threads
     user_interface.start()
     work.start()
+    status.set("Scanned " + str(len(files)) + " files and found " + str(len(scan_n_plan.image_list)) + " images.")
     logging.info("scan_files_for_images_and_update_ui function ended")
+    logging.info("Found " + str(len(scan_n_plan.image_list)) + " images.")
 
 def process_images_and_update_ui():
     logging.info("process_images_and_update_ui function started")
-    global image_list
-    logging.info("The var was sent with " + str(len(image_list)) + "entries.")
+    logging.info("The var was sent with " + str(len(scan_n_plan.image_list)) + "entries.")
     user_interface = threading.Thread(target=turn_off_button_during_work)
-    work = threading.Thread(target=lambda: werkwerkwerk.process_images(image_list))
+    work = threading.Thread(target=lambda: werkwerkwerk.process_images(scan_n_plan.image_list))
     user_interface.start()
     work.start()
     logging.info("process_images_and_update_ui function ended")
