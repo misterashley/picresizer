@@ -5,19 +5,59 @@ from tkinter import * #to build the GUI
 from time import sleep # to allow small delays
 #import tkinter as tk
 #from time import sleep # for update_idletasks
-import scan_n_plan, werkwerkwerk
+import werkwerkwerk
 import logging #to log errors
+
 #logging.WARNING for least info
 #logging.INFO for next amount
 #logging.DEBUG for verbose
 logging.basicConfig(filename='example.log', filemode='w', level=logging.INFO)
+
+#PIL to read images (to get their dimensions)
+from PIL import Image
+
+'''
+
+scan_n_plan comments
+
+## scanNplan is part of version 2 of picresizer
+## https://github.com/misterashley/picresizer
+##
+## Get a file selection (currently from config file, later from GUI)
+##
+## Get set of option to use, set these globally
+##
+## Pass the above to scanNplan, and build a VFO
+##    (a list of verified files, with the options to work on)
+##
+## File selector
+##   - Choose a folder
+##       - Option to delve into subfolders
+##   - Choose a file
+## Options (set globally)
+##   - Maximum desired output image dimension (Desired ratio is a function of max output)
+##   - Minimum desired output image dimensions
+##   - Resize images
+##   - Canvas enabled
+##   - Canvas colour ? (Hex value, colour wheel perhaps)
+##   - Compression enabled / percent
+##   - Strip EXIF data to shrink filesize
+##   - Convert to .JPG
+##       - Delete original image upon successful conversion
+##   - Preserve .PNG images in that format
+##   - Debug to console
+'''
 
 def close_window():
     root.destroy()
     logging.info("GUI stopped")
     exit()
 
-def select_folder():
+#user selects folder
+#selected folder gets list of files
+#list of files is scanned for images
+#list of images
+def select_folder(): 
         logging.info("select_folder function started")
         global selected_directory
         global buttonProcessImages
@@ -25,13 +65,11 @@ def select_folder():
         #global labelStatus
         selected_directory.set(filedialog.askdirectory())
         if selected_directory.get() != '':
-            #labelStatus.config(text="Working")
-            #global image_list
             logging.info("We got this folder " + str(selected_directory.get()))
             get_list_of_files_from_directory(selected_directory.get())
             
             #turn on the process image button
-            #buttonProcessImages.config(state=NORMAL)
+            buttonProcessImages.config(state=NORMAL)
 
             #update Instructions
             #status.set("Click Process Images button to change your images.")
@@ -43,11 +81,29 @@ def select_folder():
         logging.info(selected_directory.get())
         logging.info("select_folder function ended")
 
+def find_files(folder):
+    logging.info("find_files function started")
+    found_files = []
+##    os.chdir(folder)
+    for root, dirs, files in os.walk(folder, topdown = False):
+        for name in files:
+##            path = []
+##            path.append(root)
+##            path.append(name)
+##            logging.debug("Found: " + str(path))
+            found_files.append(os.path.join(root, name))
+            logging.debug("Found: " + str(os.path.join(root, name)))
+##            found_files.append(path)
+    logging.info("file_files found " + str(len(found_files)) + " files.")
+    logging.info("find_files function started ended")
+    return found_files
+
+#from scan_n_ plan
 def get_list_of_files_from_directory(directory):
     logging.info("get_list_of_images_from_directory function started")
     global status
     status.set("Looking at the files...")
-    list_of_files = scan_n_plan.find_files(selected_directory.get())
+    list_of_files = find_files(selected_directory.get())
     status.set("Found " + str(len(list_of_files)) + " files.")
 
     logging.info("Now we'll scan the files to find out which are images.")
@@ -63,15 +119,52 @@ def get_list_of_files_from_directory(directory):
 ##        status.set("Something unexpected happened!!")
     logging.info("get_list_of_images_from_directory function ended")
 
+#from scan_n_plan
+# Check if a file is an image. If so, store the file path & image dimensions.
+def get_image_list_from_file_list(files_to_scan):
+    
+    #this is the list we'll populate. find it by referring to image_list
+    global image_list 
+    logging.info("get_image_list_from_file_list function started")
+    
+    # Check if there are any files, if none stop.
+    if len(files_to_scan) == 0 :
+        logging.info("There were " + str(len(files_to_scan))+ " files to scan.")
+
+    for file in files_to_scan:
+        this_image = []
+        #this_image = (validate_image_dimensions(file))
+        try:
+            img = Image.open(file)
+            width, height = img.size
+            this_image.append(file)
+            this_image.append(width)
+            this_image.append(height)
+            image_list.append(this_image)
+            logging.info("Found an image: " + str(this_image))
+        except:
+            logging.debug("Not an image: " + str(file))
+            break
+    
+    logging.info("Found " + str(len(image_list)) + " images from " + str(len(files_to_scan)) + " files.")
+## probably can get rid of all this.
+##    global work_happening
+##    logging.info("Work happening set to: " + str(work_happening))
+##    time.sleep(1)
+##    work_happening =  False #"Pineapple" #Falsefuckity
+##    logging.info("Work happening set to: " + str(work_happening))
+    logging.info("get_image_list_from_file_list function ended")
+
+
 def turn_off_button_during_scan():
     logging.info("turn_off_button_during_work function started")
     buttonProcessImages.config(state=DISABLED)
     sleep(0.5)# a little pause to help multithreading be cool.
-    scan_n_plan.work_happening = True
-    while scan_n_plan.work_happening:
+    global work_happening
+    work_happening = True
+    while work_happening:
         sleep(1)
-        print(".")
-        print(scan_n_plan.work_happening)
+        print(".",)
         pass
     buttonProcessImages.config(state=NORMAL)
     logging.info("turn_off_button_during_work function ended")
@@ -81,7 +174,7 @@ def turn_off_button_during_work():
     logging.info("turn_off_button_during_work function started")
     buttonProcessImages.config(state=DISABLED)
     sleep(0.5)# a little pause to help multithreading be cool.
-    scan_n_plan.work_happening = True
+    work_happening = True
     while werkwerkwerk.work_happening:
         sleep(1)
         print(".")
@@ -99,20 +192,20 @@ def scan_files_for_images_and_update_ui(files):
     user_interface = threading.Thread(target=turn_off_button_during_scan)
 
     #the work of checking which files are images
-    work = threading.Thread(target=scan_n_plan.get_image_list_from_file_list(files))
+    scan = threading.Thread(target=get_image_list_from_file_list(files))
 
     #start both threads
     user_interface.start()
-    work.start()
-    status.set("Scanned " + str(len(files)) + " files and found " + str(len(scan_n_plan.image_list)) + " images.")
+    scan.start()
+    status.set("Scanned " + str(len(files)) + " files and found " + str(len(image_list)) + " images.")
     logging.info("scan_files_for_images_and_update_ui function ended")
-    logging.info("Found " + str(len(scan_n_plan.image_list)) + " images.")
+    logging.info("Found " + str(len(image_list)) + " images.")
 
 def process_images_and_update_ui():
     logging.info("process_images_and_update_ui function started")
-    logging.info("The var was sent with " + str(len(scan_n_plan.image_list)) + "entries.")
+    logging.info("The var was sent with " + str(len(image_list)) + "entries.")
     user_interface = threading.Thread(target=turn_off_button_during_work)
-    work = threading.Thread(target=lambda: werkwerkwerk.process_images(scan_n_plan.image_list))
+    work = threading.Thread(target=lambda: werkwerkwerk.process_images(image_list))
     user_interface.start()
     work.start()
     logging.info("process_images_and_update_ui function ended")
@@ -265,9 +358,12 @@ if __name__ == "__main__":
         #print(dir(labelStatus))
         #labelStatus.pack(status_bar, expand='True', anchor='se')
 
+        #This will be the list of images. Next make this a class and add methods.
         global image_list
         image_list = []
-        #global work_happening
-        #work_happening = False
+
+        #This is what I'll monitor to evaluate if the scan is done. Ugly? Sure. Sorry.
+        global work_happening
+        work_happening = False
         
         root.mainloop()
