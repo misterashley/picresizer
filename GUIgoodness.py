@@ -53,12 +53,24 @@ def close_window():
     logging.info("GUI stopped")
     exit()
 
-#user selects folder
-#selected folder gets list of files
-#list of files is scanned for images
-#list of images
-def select_folder(): 
-        logging.info("select_folder function started")
+'''
+scan_button runs scan_folder()
+scan_folder asks user for folder
+scan_folder gets file_list from folder
+in thread(
+    scan_folder gets gets image_list from file_list
+        scan_folder updates statusbar
+    scan_folder creates global image_list (image with dimensions)
+        scan_folder updates statusbar
+        )
+    
+in thread(
+    werkwerkwerk gets image_list (image with dimensions) and user chosen settings
+    werkwerkwerk processes images on the filesystem. hopefully taking advantage of multi-threading
+        werkwerkwerk updates statusbar
+'''
+def scan_folder(): 
+        logging.info("scan_folder function started")
         global selected_directory
         global buttonProcessImages
         #global labelInstructions
@@ -66,8 +78,19 @@ def select_folder():
         selected_directory.set(filedialog.askdirectory())
         if selected_directory.get() != '':
             logging.info("We got this folder " + str(selected_directory.get()))
-            get_list_of_files_from_directory(selected_directory.get())
-            
+
+            #get a list of files
+            file_list = return_file_list_from_directory(selected_directory.get())
+
+            #update UI with # of files
+
+            #get a list of images with dimensions from the files
+            image_list = return_images_from_file_list(file_list)
+
+            #start updating UI with percentage done of file scan.
+
+
+
             #turn on the process image button
             buttonProcessImages.config(state=NORMAL)
 
@@ -79,7 +102,7 @@ def select_folder():
             #turn off the process image button
             buttonProcessImages.config(state=DISABLED)
         logging.info(selected_directory.get())
-        logging.info("select_folder function ended")
+        logging.info("scan_folder function ended")
 
 def find_files(folder):
     logging.info("find_files function started")
@@ -283,7 +306,7 @@ if __name__ == "__main__":
         labelInstructions.pack(padx=10, anchor='w')
 
         #Build the choose a folder button. This direction is meant to have images. We'll scan subdirectories as well.
-        buttonChoose = Button(main, text ="Select a folder to scan", width=20, command=select_folder)
+        buttonChoose = Button(main, text ="Select a folder to scan", width=20, command=scan_folder)
         buttonChoose.pack(pady=10)
 
         #Initialize selected_directory
