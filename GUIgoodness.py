@@ -11,7 +11,7 @@ import logging #to log errors
 #logging.WARNING for least info
 #logging.INFO for next amount
 #logging.DEBUG for verbose
-logging.basicConfig(filename='example.log', filemode='w', level=logging.INFO)
+logging.basicConfig(filename='example.log', filemode='w', level=logging.DEBUG)
 
 #PIL to read images (to get their dimensions)
 from PIL import Image
@@ -57,104 +57,92 @@ def close_window():
 scan_button runs scan_folder()
 scan_folder asks user for folder
 scan_folder gets file_list from folder
-in thread(
-    scan_folder gets gets image_list from file_list
-        scan_folder updates statusbar
-    scan_folder creates global image_list (image with dimensions)
-        scan_folder updates statusbar
-        )
-    
-in thread(
-    werkwerkwerk gets image_list (image with dimensions) and user chosen settings
-    werkwerkwerk processes images on the filesystem. hopefully taking advantage of multi-threading
-        werkwerkwerk updates statusbar
+scan_folder resets image_list
+scan_folder spins up thread_find_images with file_list
+    thread_find_images searches files_list for images found, populates global image_list
+    thread_find_images updates statusbar as it goes
+    thread_find_images reports when it is done
+
+process_button runs process_images()
+process_images spins up thread update_image_files with image_list and settings
+    update_image_files starts modifying images in image_list using settings
+    update_image_files updates statsubar as it goes
+    update_image_files reports when it is done
 '''
 def scan_folder(): 
         logging.info("scan_folder function started")
         global selected_directory
-        global buttonProcessImages
-        #global labelInstructions
-        #global labelStatus
+        global buttonProcessImages #buttonProcessImages.config(state=DISABLED/NORMAL)
+        global status #status bar text status.set("text")
+
         selected_directory.set(filedialog.askdirectory())
-        if selected_directory.get() != '':
+        if selected_directory.get() != '': #this is more for the 2nd time we select a folder
             logging.info("We got this folder " + str(selected_directory.get()))
 
+#####STEP ONE#####
+##            status.set("Finding files in " + str(selected_directory.get()))
+            root.update_idletasks() #show the status update
+            
             #get a list of files
             file_list = return_file_list_from_directory(selected_directory.get())
 
-            #update UI with # of files
+#####STEP TWO#####
+            #build out images_list with imagges & dimensions from the files
+            threading_scan_images(file_list)
 
-            #get a list of images with dimensions from the files
-            image_list = return_images_from_file_list(file_list)
-
-            #start updating UI with percentage done of file scan.
-
-
-
-            #turn on the process image button
-            buttonProcessImages.config(state=NORMAL)
-
-            #update Instructions
-            #status.set("Click Process Images button to change your images.")
-            #labelStatus.config(text ="Ready")
-                        
+            #start updating UI with percentage done of file scan. Unless we can offload this to the function?
+            
         else:
             #turn off the process image button
             buttonProcessImages.config(state=DISABLED)
         logging.info(selected_directory.get())
         logging.info("scan_folder function ended")
 
-def find_files(folder):
+def return_file_list_from_directory(folder):
+    ##STEP ONE of scan
     logging.info("find_files function started")
     found_files = []
-##    os.chdir(folder)
+    
     for root, dirs, files in os.walk(folder, topdown = False):
-        for name in files:
-##            path = []
-##            path.append(root)
-##            path.append(name)
-##            logging.debug("Found: " + str(path))
-            found_files.append(os.path.join(root, name))
-            logging.debug("Found: " + str(os.path.join(root, name)))
-##            found_files.append(path)
+        for file in files:
+            found_files.append(os.path.join(root, file))
+            logging.debug("Found: " + str(os.path.join(root, file)))
     logging.info("file_files found " + str(len(found_files)) + " files.")
     logging.info("find_files function started ended")
     return found_files
 
-#from scan_n_ plan
-def get_list_of_files_from_directory(directory):
-    logging.info("get_list_of_images_from_directory function started")
-    global status
-    status.set("Looking at the files...")
-    list_of_files = find_files(selected_directory.get())
-    status.set("Found " + str(len(list_of_files)) + " files.")
+def threading_scan_images(files):
+    #STEP TWO of scan
+    logging.info("threading_scan_images function started")
+    logging.info("The var was sent with " + str(len(files)) + " entries.")
 
-    logging.info("Now we'll scan the files to find out which are images.")
-    logging.debug(str(list_of_files))
-    scan_files_for_images_and_update_ui(list_of_files)
-    #This scan happens in a thread, and the status is updated until it's done.
-    #logging.debug("Here is a list of the images: " + (str(list_of_images)))
-    
-                
-##    except:
-##        #hide the process button
-##        #change the message back to select a folder
-##        status.set("Something unexpected happened!!")
-    logging.info("get_list_of_images_from_directory function ended")
+    #the work of checking which files are images
+    scan = threading.Thread(target=get_image_list_from_file_list(files))
 
-#from scan_n_plan
+    #start both threads
+    #user_interface.start()
+    scan.start()
+    logging.info("threading_scan_images function ended. Thread is still running.")
+
 # Check if a file is an image. If so, store the file path & image dimensions.
 def get_image_list_from_file_list(files_to_scan):
+    logging.info("scan_files_for_images_and_update_ui function started")
+    logging.debug(files_to_scan)
+
+    global status
     
-    #this is the list we'll populate. find it by referring to image_list
-    global image_list 
-    logging.info("get_image_list_from_file_list function started")
     
     # Check if there are any files, if none stop.
     if len(files_to_scan) == 0 :
-        logging.info("There were " + str(len(files_to_scan))+ " files to scan.")
+        status.set("There were no files to scan.")
+        logging.info("There were no files to scan.")
+    
+    #refer to the image_list and clear it out
+    global image_list
+    image_list = []
 
     for file in files_to_scan:
+        i =+ 1
         this_image = []
         #this_image = (validate_image_dimensions(file))
         try:
@@ -164,33 +152,28 @@ def get_image_list_from_file_list(files_to_scan):
             this_image.append(width)
             this_image.append(height)
             image_list.append(this_image)
-            logging.info("Found an image: " + str(this_image))
+            logging.debug("Found an image: " + str(this_image))
         except:
             logging.debug("Not an image: " + str(file))
-            break
+        if i % 50 == 0:
+            status.set("Found " + str(len(image_list)) + " images from " + str(len(files_to_scan)) + " files.")
+            root.update_idletasks()
+
+    #prepare to update the Process Images button
+    global buttonProcessImages
+    
+    if image_list == 0:
+        status.set("No images found.")
+        buttonProcessImages.config(state=DISABLED)
+        root.update_idletasks()
+
+    elif len(image_list) > 0:
+        status.set("Found " + str(len(image_list)) + " images from " + str(len(files_to_scan)) + " files.")
+        buttonProcessImages.config(state=NORMAL)
+        root.update_idletasks()
     
     logging.info("Found " + str(len(image_list)) + " images from " + str(len(files_to_scan)) + " files.")
-## probably can get rid of all this.
-##    global work_happening
-##    logging.info("Work happening set to: " + str(work_happening))
-##    time.sleep(1)
-##    work_happening =  False #"Pineapple" #Falsefuckity
-##    logging.info("Work happening set to: " + str(work_happening))
     logging.info("get_image_list_from_file_list function ended")
-
-
-def turn_off_button_during_scan():
-    logging.info("turn_off_button_during_work function started")
-    buttonProcessImages.config(state=DISABLED)
-    sleep(0.5)# a little pause to help multithreading be cool.
-    global work_happening
-    work_happening = True
-    while work_happening:
-        sleep(1)
-        print(".",)
-        pass
-    buttonProcessImages.config(state=NORMAL)
-    logging.info("turn_off_button_during_work function ended")
 
 def turn_off_button_during_work():
     #global work_happening I don't think this does what I want it to do
@@ -206,24 +189,6 @@ def turn_off_button_during_work():
     buttonProcessImages.config(state=NORMAL)
     logging.info("turn_off_button_during_work function ended")
 
-
-def scan_files_for_images_and_update_ui(files):
-    logging.info("scan_files_for_images_and_update_ui function started")
-    logging.info("The var was sent with " + str(len(files)) + " entries.")
-
-    #disable process images button
-    user_interface = threading.Thread(target=turn_off_button_during_scan)
-
-    #the work of checking which files are images
-    scan = threading.Thread(target=get_image_list_from_file_list(files))
-
-    #start both threads
-    user_interface.start()
-    scan.start()
-    status.set("Scanned " + str(len(files)) + " files and found " + str(len(image_list)) + " images.")
-    logging.info("scan_files_for_images_and_update_ui function ended")
-    logging.info("Found " + str(len(image_list)) + " images.")
-
 def process_images_and_update_ui():
     logging.info("process_images_and_update_ui function started")
     logging.info("The var was sent with " + str(len(image_list)) + "entries.")
@@ -232,41 +197,6 @@ def process_images_and_update_ui():
     user_interface.start()
     work.start()
     logging.info("process_images_and_update_ui function ended")
-
-##def process_queue_of_images():
-##        global image_list
-##        #global root
-##        #print(len(image_list))
-##        logging.info("Images to process:" + str(len(image_list)))
-##        global labelStatus
-##        i = 0
-##        for image in image_list:
-##                try:
-##                        #get an image from the list of images
-##                        image = image_list.pop()
-##                        #logging.info(image)
-##
-##                        #process that image file
-##                        werkwerkwerk.process_image(image)
-##
-##                        #update counter. Every 10 images updates status bar.
-##                        i = i + 1
-##                        
-##                        #update status bar every 10 images
-##                        if i%10 == 0 : 
-##                                labelStatus.config(text="Images processed: " + str(i))
-##                                #let the window update
-##                                root.updated_idletasks()
-##                                
-##                except:
-##                        logging.info("An error during processing image queue.")
-##                        #cannot pop a file from the list. This means we're done the whole list
-##        logging.info("Finished processing image files.")
-##
-##        #Let us know we're done the process.
-##        labelText.set("Processed " + str(i) + " images.")
-##        global buttonProcessImages
-##        buttonProcessImages.config(state=DISABLED)        
 
 def App(): pass
 ## Reminders:
@@ -383,7 +313,6 @@ if __name__ == "__main__":
 
         #This will be the list of images. Next make this a class and add methods.
         global image_list
-        image_list = []
 
         #This is what I'll monitor to evaluate if the scan is done. Ugly? Sure. Sorry.
         global work_happening
