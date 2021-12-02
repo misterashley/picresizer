@@ -230,7 +230,7 @@ if __name__ == "__main__":
 
         # The main part of the window
         main = Frame(root, bg='white')
-        main.pack(side = 'top', expand = True, fill = 'both')
+        main.pack(side='top', expand=True, fill='both')
 
         #consider a part of the screen that looks for imagemagick and reports on this
         #perhaps a list of requirements with OK in green, missing in red, and an info button if missing.
@@ -238,7 +238,7 @@ if __name__ == "__main__":
 
         # Build a label: A status bar
         status_bar = Frame(root, bg='black', relief='sunken')
-        status_bar.pack(side = 'bottom', expand = True, fill = 'x', anchor='s')
+        status_bar.pack(side='bottom', expand=True, fill='x', anchor='s')
 
         #Build a label: The instructions
         global instructions
@@ -247,11 +247,11 @@ if __name__ == "__main__":
         #global labelInstructions
         labelInstructions = Label(main, textvariable=instructions, 
             justify='left', bg="white", fg="black", font=("Helvetica",10))
-        labelInstructions.pack(padx=10, anchor='w')
+        labelInstructions.grid(row=0, column=0, columnspan=5)#, 'anchor='w')
 
         #Build the choose a folder button. This direction is meant to have images. We'll scan subdirectories as well.
         buttonChoose = Button(main, text ="Select a folder to scan", width=20, command=scan_folder)
-        buttonChoose.pack(pady=10)
+        buttonChoose.grid(row=1, column=0)#.pack(pady=10)
 
         #Initialize selected_directory
         global selected_directory
@@ -261,55 +261,134 @@ if __name__ == "__main__":
         #global labelPath
         labelPath = Label (main, textvariable=selected_directory, 
             bg="white", fg="blue", font=("monospace", 10))
-        labelPath.pack()
+        labelPath.grid(row=2, column=0, columnspan=5)#.pack()
         
-        #Build a checkbox: Resize the images
+        ########################################
+        #  Maximum dimensions                  #
+        ########################################
         resizeMax = IntVar()
         resizeMax.set(1) #enable by default
         resizeImageBox = Checkbutton(main, text="Shrink images to maximum", variable=resizeMax)
-        resizeImageBox.pack(padx=10, anchor='w')
+        resizeImageBox.grid(row=3, column=0, rowspan=2)#.pack(padx=10, anchor='w')
+
+        maxHeightLabel = Label(main, text="Max Height")
+        maxHeightLabel.grid(row=3, column=1)
 
         #Build an entry box: Max Dimension for Height
-        maxHeight = Entry(main, width=10, text="Maximum width of images")
-        maxHeight.pack(padx=10, pady=10, anchor='w')
-        #maxHeight.insert("1000")
+        maxHeight = Entry(main, width=10)
+        maxHeight.grid(row=4, column=1)#.pack(padx=10, pady=10, anchor='w')
+        maxHeight.insert(0, 1000)
         #maxHeight.get() will give you the text supplied in the entry box... it will not Entry is unique apparent. How fucking stupid.
+
+        maxWidthLabel = Label(main, text="Max Width")
+        maxWidthLabel.grid(row=3, column=2)
 
         #Build an entry box: Max Dimension for Width
         maxWidth = Entry(main, width=10, text="Maximum width of images" )
-        maxWidth.pack(padx=10, pady=10, anchor='w')
+        maxWidth.grid(row=4, column=2)#.pack(padx=10, pady=10, anchor='w')
         maxWidth.insert(0, 1000)
         #maxHeight.get() will give you the text supplied in the entry box.
 
+        ########################################
+        #  Minimum dimensions.                 #
+        ########################################
         #Build a checkbox: Stretch image to at least minimum size
         resizeMin = IntVar()
         resizeMin.set(1) #enable by default
         resizeImageBox = Checkbutton(main, text="Stretch images to minimum", variable=resizeMin)
-        resizeImageBox.pack(padx=10, anchor='w')
+        resizeImageBox.grid(row=5, column=0, rowspan=2)#.pack(padx=10, anchor='w')
+
+        minHeightLabel = Label(main, text="Min Height")
+        minHeightLabel.grid(row=5, column=1)
 
         #Build an entry box: Min Dimension for Height
-        minHeight = Entry(main, width=10, text="Maximum width of images")
-        minHeight.pack(padx=10, pady=10, anchor='w')
-        #maxHeight.insert("1000")
-        #maxHeight.get() will give you the text supplied in the entry box... it will not Entry is unique apparent. How fucking stupid.
+        minHeight = Entry(main, width=10)
+        minHeight.grid(row=6, column=1)#.pack(padx=10, pady=10, anchor='w')
+        minHeight.insert(0,400)
+        #minHeight.get() will give you the text supplied in the entry box... it will not Entry is unique apparent. How fucking stupid.
+
+        minWidthLabel = Label(main, text="Min Width")
+        minWidthLabel.grid(row=5, column=2)
 
         #Build an entry box: Minimum Dimension for Width
-        minWidth = Entry(main, width=10, text="Maximum width of images" )
-        minWidth.pack(padx=10, pady=10, anchor='w')
-        #minWidth.insert(0, 1000)
-        #maxHeight.get() will give you the text supplied in the entry box.
+        minWidth = Entry(main, width=10)
+        minWidth.grid(row=6, column=2)#.pack(padx=10, pady=10, anchor='w')
+        minWidth.insert(0, 400)
+        #minWidth.get() will give you the text supplied in the entry box.
+
+        ########################################
+        #  Other options.                      #
+        ########################################
+
+        #Build a checkbox: Convert images to .JPG
+        convertJPG = IntVar() #0 for unchecked, 1 for checked.
+        convertJPG.set(1) #enable by default
+        convertJPGBox = Checkbutton(main, text="Convert images to .JPG", variable=convertJPG)
+        convertJPGBox.grid(row=9, column=0, sticky=W, padx=5)#.pack(padx=10, anchor='w')
+
+        imageCompression = IntVar() # 0-100 percentage.
+        imageCompression.set(1)
+        imageCompressionBox = Checkbutton(main, text="Compress images", variable=imageCompression)
+        imageCompressionBox.grid(row=10, column=0, rowspan=2, sticky=W, padx=5)
+
+        imageCompressionLabel = Label(main, text="%100 is highest quality, \n but least compression \n (0 to 100)")
+        imageCompressionLabel.grid(row=10, column=1, columnspan=2)
+
+        imageCompressionPercent = Entry(main, width=5)
+        imageCompressionPercent.insert(0,100)
+        imageCompressionPercent.grid(row=11, column=1)
 
         #Build a checkbox: Add canvas to reshape image dimensions
         addCanvas = IntVar() #0 for unchecked, 1 for checked.
         addCanvas.set(1) #enable by default
         addCanvasBox = Checkbutton(main, text="Add a white canvas to images", variable=addCanvas)
-        addCanvasBox.pack(padx=10, anchor='w')
+        addCanvasBox.grid(row=12, column=0, sticky=W, padx=5)#.pack(padx=10, anchor='w')
 
         #Build a checkbox: Strip EXIF from JPEG or PNG
         stripExif = IntVar()
         stripExif.set(1) #enable by default
         stripExifBox = Checkbutton(main, text="Strip EXIF info from images", variable=stripExif)
-        stripExifBox.pack(padx=10, anchor='w')
+        stripExifBox.grid(row=13, column=0, sticky=W, padx=5)#.pack(padx=10, anchor='w')
+
+        #Build a checkbox: Delete original file if conversion is successful
+        delOriginalFile = IntVar() #0 for unchecked, 1 for checked.
+        delOriginalFile.set(1) #enable by default
+        delOriginalFileBox = Checkbutton(main, text="Delete original file if conversion is successful", variable=delOriginalFile)
+        delOriginalFileBox.grid(row=14, column=0, sticky=W, padx=5)#.pack(padx=10, anchor='w')
+
+        #Build a checkbox: Preserve PNG files
+        keepPNGFile = IntVar() #0 for unchecked, 1 for checked.
+        keepPNGFile.set(0) #enable by default
+        keepPNGFileBox = Checkbutton(main, text="But, don't delete if the file is a .PNG", variable=keepPNGFile)
+        keepPNGFileBox.grid(row=15, column=0, sticky=W, padx=30)#.pack(padx=10, anchor='w')
+
+        #List drop down (rather than Checkbox) for reporting (debugging)
+
+        ########################################
+        #  Modify image files button.          #
+        ########################################
+
+        global buttonProcessImages
+        buttonProcessImages = Button(main, text="No images selected", 
+            width=20, command=process_images_and_update_ui, state=DISABLED)
+        buttonProcessImages.grid(row=50, column=0, sticky=E, padx=60)#.pack(anchor='e', pady=20, padx=20)
+        #turn off the Process Images buton.
+
+        ########################################
+        #  Status bar.                         #
+        ########################################
+
+        #Build a label: Status message
+        global status
+        status = StringVar()
+        status.set("Ready")
+        #global labelStatus
+        labelStatus = Label(status_bar, textvariable=status, 
+            fg='green', bg='black', padx='10', font=("monospace",13))
+        labelStatus.pack(expand='True', anchor=SE)
+        #print(dir(labelStatus))
+        #labelStatus.pack(status_bar, expand='True', anchor='se')
+
 
         #Gather all the settings into a single element and make it globally available.
         global imageConfig
@@ -324,25 +403,6 @@ if __name__ == "__main__":
                        }
         logging.info("Image configuration: "+ str(imageConfig))
 
-        #List drop down (rather than Checkbox) for reporting (debugging)
-
-        #Build a button: Process Images
-        global buttonProcessImages
-        buttonProcessImages = Button(main, text="Process Images", 
-            width=20, command=process_images_and_update_ui, state=DISABLED)
-        buttonProcessImages.pack(anchor='e', pady=20, padx=20)
-        #turn off the Process Images buton.
-
-        #Build a label: Status message
-        global status
-        status = StringVar()
-        status.set("Ready")
-        #global labelStatus
-        labelStatus = Label(status_bar, textvariable=status, 
-            fg='green', bg='black', padx='10', font=("monospace",13))
-        labelStatus.pack(expand='True', anchor=SE)
-        #print(dir(labelStatus))
-        #labelStatus.pack(status_bar, expand='True', anchor='se')
 
         #This will be the list of images. Next make this a class and add methods.
         global image_list
