@@ -16,38 +16,6 @@ logging.basicConfig(filename='example.log', filemode='w', level=logging.DEBUG)
 #PIL to read images (to get their dimensions)
 from PIL import Image
 
-'''
-
-scan_n_plan comments
-
-## scanNplan is part of version 2 of picresizer
-## https://github.com/misterashley/picresizer
-##
-## Get a file selection (currently from config file, later from GUI)
-##
-## Get set of option to use, set these globally
-##
-## Pass the above to scanNplan, and build a VFO
-##    (a list of verified files, with the options to work on)
-##
-## File selector
-##   - Choose a folder
-##       - Option to delve into subfolders
-##   - Choose a file
-## Options (set globally)
-##   - Maximum desired output image dimension (Desired ratio is a function of max output)
-##   - Minimum desired output image dimensions
-##   - Resize images
-##   - Canvas enabled
-##   - Canvas colour ? (Hex value, colour wheel perhaps)
-##   - Compression enabled / percent
-##   - Strip EXIF data to shrink filesize
-##   - Convert to .JPG
-##       - Delete original image upon successful conversion
-##   - Preserve .PNG images in that format
-##   - Debug to console
-'''
-
 def close_window():
     root.destroy()
     logging.info("GUI stopped")
@@ -90,7 +58,8 @@ def scan_folder():
             #build out images_list with imagges & dimensions from the files
             threading_scan_images(file_list)
 
-            #start updating UI with percentage done of file scan. Unless we can offload this to the function?
+            #start updating UI with percentage done of file scan. 
+            #Unless we can offload this to the function?
             
         else:
             #turn off the process image button
@@ -156,7 +125,8 @@ def get_image_list_from_file_list(files_to_scan):
         except:
             logging.debug("Not an image: " + str(file))
         if i % 50 == 0:
-            status.set("Found " + str(len(image_list)) + " images from " + str(len(files_to_scan)) + " files.")
+            status.set("Found " + str(len(image_list)) + " images from " +
+             str(len(files_to_scan)) + " files.")
             root.update_idletasks()
 
     #prepare to update the Process Images button
@@ -168,8 +138,9 @@ def get_image_list_from_file_list(files_to_scan):
         root.update_idletasks()
 
     elif len(image_list) > 0:
-        status.set("Found " + str(len(image_list)) + " images from " + str(len(files_to_scan)) + " files.")
-        buttonProcessImages.config(state=NORMAL)
+        status.set("Found " + str(len(image_list)) + " images from " +
+         str(len(files_to_scan)) + " files.")
+        buttonProcessImages.config(state=NORMAL, text="Modify {} images".format(len(image_list)))
         root.update_idletasks()
     
     logging.info("Found " + str(len(image_list)) + " images from " + str(len(files_to_scan)) + " files.")
@@ -191,6 +162,10 @@ def turn_off_button_during_work():
 
 def process_images_and_update_ui():
     logging.info("process_images_and_update_ui function started")
+
+    # fetch the current settings
+    get_settings() 
+
     logging.info("The var was sent with " + str(len(image_list)) + "entries.")
     user_interface = threading.Thread(target=turn_off_button_during_work)
     work = threading.Thread(target=lambda: werkwerkwerk.process_images(image_list))
@@ -198,10 +173,49 @@ def process_images_and_update_ui():
     work.start()
     logging.info("process_images_and_update_ui function ended")
 
+def get_settings():
+    logging.info("get_settings function started")
+    
+    logging.info("get_settings function ended")
+
 def App(): pass
 ## Reminders:
 ## a variable with StringVar() can use .set("text") and .get() to retrieve its contents
 ## a variable with Button() can use .config(state=DISABLED) or .config(state=NORMAL) 
+
+
+'''
+
+scan_n_plan comments
+
+ scanNplan is part of version 2 of picresizer
+ https://github.com/misterashley/picresizer
+
+ Get a file selection (currently from config file, later from GUI)
+
+ Get set of option to use, set these globally
+
+ Pass the above to scanNplan, and build a VFO
+    (a list of verified files, with the options to work on)
+
+ File selector
+   X Choose a folder
+       - Option to delve into subfolders
+
+ Options (captured into a list called settings)
+   X Resize images
+   X Maximum desired output image dimension (Desired ratio is a function of max output)
+   X Minimum desired output image dimensions
+   X Canvas enabled
+   - Canvas colour ? (Hex value, colour wheel perhaps)
+   - Compression enabled / percent
+   X Strip EXIF data to shrink filesize
+   - Convert to .JPG
+       - Delete original image upon successful conversion
+   - Preserve .PNG images in that format
+   - Debug to console
+'''
+
 
 if __name__ == "__main__":
         #The GUI has been launched.
@@ -229,10 +243,10 @@ if __name__ == "__main__":
         #Build a label: The instructions
         global instructions
         instructions = StringVar()
-        instructions.set("""Instructions: \n1. Choose a folder of images to modify. \n2. Choose your options. \n3. Click Process Images. \nWARNING: This will overwrite your images!!!""")
-        #instructions ="""Instructions: \n1. Choose a folder of images to modify. \n2. Choose your options. \n3. Click Process Images. \nWARNING: This will overwrite your images!!!"""
+        instructions.set("""Instructions: \n1. Choose a folder of images to modify. \n2. Choose your options. \n3. Click Modify Images.""")
         #global labelInstructions
-        labelInstructions = Label(main, textvariable=instructions, justify='left', bg="white", fg="black", font=("Helvetica",10))
+        labelInstructions = Label(main, textvariable=instructions, 
+            justify='left', bg="white", fg="black", font=("Helvetica",10))
         labelInstructions.pack(padx=10, anchor='w')
 
         #Build the choose a folder button. This direction is meant to have images. We'll scan subdirectories as well.
@@ -245,13 +259,14 @@ if __name__ == "__main__":
 
         #Build a label: This is the working directory to process
         #global labelPath
-        labelPath = Label (main, textvariable=selected_directory, bg="white", fg="blue", font=("monospace", 10))
+        labelPath = Label (main, textvariable=selected_directory, 
+            bg="white", fg="blue", font=("monospace", 10))
         labelPath.pack()
         
         #Build a checkbox: Resize the images
-        resizeImage = IntVar()
-        resizeImage.set(1) #enable by default
-        resizeImageBox = Checkbutton(main, text="Resize images", variable=resizeImage)
+        resizeMax = IntVar()
+        resizeMax.set(1) #enable by default
+        resizeImageBox = Checkbutton(main, text="Shrink images to maximum", variable=resizeMax)
         resizeImageBox.pack(padx=10, anchor='w')
 
         #Build an entry box: Max Dimension for Height
@@ -267,26 +282,43 @@ if __name__ == "__main__":
         #maxHeight.get() will give you the text supplied in the entry box.
 
         #Build a checkbox: Stretch image to at least minimum size
-        stretchToMin = IntVar()
-        stretchToMinBox = Checkbutton(main, text="Stretch images to minimum size", variable=stretchToMin)
-        stretchToMinBox.pack(padx=10, anchor='w')
+        resizeMin = IntVar()
+        resizeMin.set(1) #enable by default
+        resizeImageBox = Checkbutton(main, text="Stretch images to minimum", variable=resizeMin)
+        resizeImageBox.pack(padx=10, anchor='w')
+
+        #Build an entry box: Min Dimension for Height
+        minHeight = Entry(main, width=10, text="Maximum width of images")
+        minHeight.pack(padx=10, pady=10, anchor='w')
+        #maxHeight.insert("1000")
+        #maxHeight.get() will give you the text supplied in the entry box... it will not Entry is unique apparent. How fucking stupid.
+
+        #Build an entry box: Minimum Dimension for Width
+        minWidth = Entry(main, width=10, text="Maximum width of images" )
+        minWidth.pack(padx=10, pady=10, anchor='w')
+        #minWidth.insert(0, 1000)
+        #maxHeight.get() will give you the text supplied in the entry box.
 
         #Build a checkbox: Add canvas to reshape image dimensions
         addCanvas = IntVar() #0 for unchecked, 1 for checked.
+        addCanvas.set(1) #enable by default
         addCanvasBox = Checkbutton(main, text="Add a white canvas to images", variable=addCanvas)
         addCanvasBox.pack(padx=10, anchor='w')
 
         #Build a checkbox: Strip EXIF from JPEG or PNG
         stripExif = IntVar()
+        stripExif.set(1) #enable by default
         stripExifBox = Checkbutton(main, text="Strip EXIF info from images", variable=stripExif)
         stripExifBox.pack(padx=10, anchor='w')
 
         #Gather all the settings into a single element and make it globally available.
         global imageConfig
-        imageConfig = {"resizeImg":resizeImage.get(),
+        imageConfig = {"resizeMax":resizeMax.get(),
                        "maxHeight":maxHeight.get(),
                        "maxWidth":maxWidth.get(),
-                       "stretchToMin":stretchToMin.get(),
+                       "resizeMin":resizeMin.get(),
+                       "minHeight":minHeight.get(),
+                       "minWidth":minWidth.get(),
                        "addCanvas":addCanvas.get(),
                        "stripExif":stripExif.get()
                        }
@@ -296,17 +328,18 @@ if __name__ == "__main__":
 
         #Build a button: Process Images
         global buttonProcessImages
-        buttonProcessImages = Button(main, text="Process Images", width=20, command=process_images_and_update_ui, state=NORMAL)
+        buttonProcessImages = Button(main, text="Process Images", 
+            width=20, command=process_images_and_update_ui, state=DISABLED)
         buttonProcessImages.pack(anchor='e', pady=20, padx=20)
         #turn off the Process Images buton.
-        buttonProcessImages.config(state=DISABLED)
 
         #Build a label: Status message
         global status
         status = StringVar()
         status.set("Ready")
         #global labelStatus
-        labelStatus = Label(status_bar, textvariable=status, fg='green', bg='black', padx='10', font=("monospace",13))
+        labelStatus = Label(status_bar, textvariable=status, 
+            fg='green', bg='black', padx='10', font=("monospace",13))
         labelStatus.pack(expand='True', anchor=SE)
         #print(dir(labelStatus))
         #labelStatus.pack(status_bar, expand='True', anchor='se')
