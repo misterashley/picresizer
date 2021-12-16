@@ -1,4 +1,5 @@
-import os #to manage files
+#import os #to manage files
+from pathlib import Path
 import threading #to let us do multiple things at once
 from tkinter import filedialog # For browsing to the directory with tkinter directory chooser
 from tkinter import ttk #for the Combobox used in debugging selection
@@ -38,22 +39,27 @@ process_images spins up thread update_image_files with image_list and settings
     update_image_files updates statsubar as it goes
     update_image_files reports when it is done
 '''
+
 def scan_folder(): 
         logging.info("scan_folder function started")
         global selected_directory #This is the directory we'll read
         global buttonProcessImages #buttonProcessImages.config(state=DISABLED/NORMAL)
         global status #status bar text status.set("text")
 
+        #get a working directory from filedialog
         selected_directory.set(filedialog.askdirectory())
+
         if selected_directory.get() != '': #this is more for the 2nd time we select a folder
             logging.info("We got this folder " + str(selected_directory.get()))
 
 #####STEP ONE#####
-            status.set("Finding files in " + str(selected_directory.get()))
-            root.update_idletasks() #show the status update
+            status.set(F"Finding files in {selected_directory.get()}. This may take a moment.")
+
+            #Let the UI update.
+            root.update_idletasks()
             
-            #get a list of files
-            file_list = return_file_list_from_directory(selected_directory.get())
+            #Get a list of files.
+            file_list = return_file_list_from_directory(selected_directory.get().replace('/','\\'))
 
 #####STEP TWO#####
             #build out images_list with imagges & dimensions from the files
@@ -72,12 +78,22 @@ def return_file_list_from_directory(folder):
     ##STEP ONE of scan
     logging.info("find_files function started")
     found_files = []
+
+    p = Path(folder)
+
+    for file in p.rglob("*"):
+        if file.is_file():
+            found_files.append(file)
+            logging.debug(F"Found file: {file}")
     
-    for root, dirs, files in os.walk(folder, topdown = False):
-        for file in files:
-            found_files.append(os.path.join(root, file))
-            logging.debug("Found: " + str(os.path.join(root, file)))
-    logging.info("file_files found " + str(len(found_files)) + " files.")
+##    for root, dirs, files in os.walk(folder, topdown = False):
+##        logging.debug(80*"#")
+##        logging.debug(root)
+##        logging.debug(dirs)
+##        for file in files:
+##            found_files.append(os.path.join(root, file))
+##            logging.debug(F"Found: {os.path.join(root, file)}")
+    logging.info(F"file_files found {len(found_files)} files.")
     logging.info("find_files function started ended")
     return found_files
 
@@ -100,7 +116,6 @@ def get_image_list_from_file_list(files_to_scan):
     logging.debug(files_to_scan)
 
     global status
-    
     
     # Check if there are any files, if none stop.
     if len(files_to_scan) == 0 :
@@ -128,6 +143,7 @@ def get_image_list_from_file_list(files_to_scan):
         if i % 50 == 0:
             status.set(F"Found {len(image_list)} images from {len(files_to_scan)} files.")
             root.update_idletasks()
+        img.close()
 
     #prepare to update the Process Images button
     global buttonProcessImages
@@ -153,10 +169,14 @@ def turn_off_button_during_work():
     work_happening = True
     while werkwerkwerk.work_happening:
         sleep(1)
-        print(".")
-        print(werkwerkwerk.work_happening)
+        print(".", end=''),
+        #print(werkwerkwerk.work_happening)
+        status.set(werkwerkwerk.status_update_text)
+        root.update_idletasks()
         pass
+    status.set("Finished. " + str(werkwerkwerk.status_update_text))
     buttonProcessImages.config(state=NORMAL)
+    root.update_idletasks()
     logging.info("turn_off_button_during_work function ended")
 
 def process_images_and_update_ui():
@@ -176,16 +196,20 @@ def process_images_and_update_ui():
 def return_image_config():
     logging.info("return_image_config function started")
     settings = {
-                "resizeMax":resizeMax.get(),
-                "maxWidth":maxWidth.get(),
-                "maxHeight":maxHeight.get(),
-                "resizeMin":resizeMin.get(),
-                "minWidth":minWidth.get(),
-                "minHeight":minHeight.get(),
-                "convertJPG":convertJPG.get(),
-                "imageCompression":imageCompression.get(),
+                "resizeMax":int(resizeMax.get()),#making these int to easy the comparisons for werkwerkwerk
+                "maxWidth":int(maxWidth.get()),
+                "maxHeight":int(maxHeight.get()),
+                "maxDimension":int(max(maxWidth.get(), maxHeight.get())),
+                
+                "resizeMin":int(resizeMin.get()),
+                "minWidth":int(minWidth.get()),
+                "minHeight":int(minHeight.get()),
+                "minDimension":int(min(minWidth.get(),minHeight.get())),
+                
                 "addCanvas":addCanvas.get(),
                 "stripExif":stripExif.get(),
+                "imageCompression":imageCompressionPercent.get(),
+                "convertJPG":convertJPG.get(),
                 "delOriginalFile":delOriginalFile.get(),
                 "keepPNGFile":keepPNGFile.get(),
                 "debuggingMenu":debuggingMenu.get(),
@@ -243,7 +267,7 @@ if __name__ == "__main__":
     root = Tk()
     root.title("picResizer by misterashley")
     root.configure(background="white")
-    root.geometry('500x600')
+    root.geometry('800x600')
 
     # The main part of the window
     main = Frame(root, bg='white')
@@ -276,7 +300,7 @@ if __name__ == "__main__":
 
     #Build a label: This is the working directory to process
     #global labelPath
-    labelPath = Label (main, textvariable=selected_directory, 
+    labelPath = Label (main, textvariable=str(selected_directory), 
         bg="white", fg="blue", font=("monospace", 10))
     labelPath.grid(row=2, column=0, columnspan=5)#.pack()
 
