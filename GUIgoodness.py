@@ -1,4 +1,3 @@
-#import os #to manage files
 from pathlib import Path
 import threading #to let us do multiple things at once
 from tkinter import filedialog # For browsing to the directory with tkinter directory chooser
@@ -63,7 +62,8 @@ def scan_folder():
 
 #####STEP TWO#####
             #build out images_list with imagges & dimensions from the files
-            threading_scan_images(file_list)
+            scan = threading.Thread(target=get_image_list_from_file_list(file_list))
+            scan.start()
 
             #start updating UI with percentage done of file scan. 
             #Unless we can offload this to the function?
@@ -78,37 +78,18 @@ def return_file_list_from_directory(folder):
     ##STEP ONE of scan
     logging.info("find_files function started")
     found_files = []
-
+    dir_counter = 0
     p = Path(folder)
-
+    #Could set up a flag to use glob for non-recursive searches with p.glob("*")
     for file in p.rglob("*"):
         if file.is_file():
             found_files.append(file)
             logging.debug(F"Found file: {file}")
-    
-##    for root, dirs, files in os.walk(folder, topdown = False):
-##        logging.debug(80*"#")
-##        logging.debug(root)
-##        logging.debug(dirs)
-##        for file in files:
-##            found_files.append(os.path.join(root, file))
-##            logging.debug(F"Found: {os.path.join(root, file)}")
-    logging.info(F"file_files found {len(found_files)} files.")
+        if file.is_dir():
+            dir_counter += 1
+    logging.info(F"file_files found {len(found_files)} files in {dir_counter} folder(s).")
     logging.info("find_files function started ended")
     return found_files
-
-def threading_scan_images(files):
-    #STEP TWO of scan
-    logging.info("threading_scan_images function started")
-    logging.info("The var was sent with " + str(len(files)) + " entries.")
-
-    #the work of checking which files are images
-    scan = threading.Thread(target=get_image_list_from_file_list(files))
-
-    #start both threads
-    #user_interface.start()
-    scan.start()
-    logging.info("threading_scan_images function ended. Thread is still running.")
 
 # Check if a file is an image. If so, store the file path & image dimensions.
 def get_image_list_from_file_list(files_to_scan):
@@ -219,7 +200,6 @@ def return_image_config():
     return settings
 
 
-def App(): pass
 ## Reminders:
 ## a variable with StringVar() can use .set("text") and .get() to retrieve its contents
 ## a variable with Button() can use .config(state=DISABLED) or .config(state=NORMAL) 
