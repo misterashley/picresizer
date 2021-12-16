@@ -1,28 +1,35 @@
+from tkinter import *
+
+#Pillow is to get image dimensions. This overwrites tkinters
+from PIL import Image as Imagereader
+from PIL import UnidentifiedImageError
+
+#To allow us to find files in the selected directory
 from pathlib import Path
-import threading #to let us do multiple things at once
-from tkinter import filedialog # For browsing to the directory with tkinter directory chooser
-from tkinter import ttk #for the Combobox used in debugging selection
-from tkinter import * #to build the GUI
-from time import sleep # to allow small delays
-#import tkinter as tk
-#from time import sleep # for update_idletasks
+
+#To prevent the UI from freezing while work is being done.
+import threading
+
+#For browsing to the directory with tkinter directory chooser
+from tkinter import filedialog
+
+#To allow the use of Combobox used in debugging selection
+from tkinter import ttk
+
+from time import sleep
+import logging
+
+#this is part of this application.
 import werkwerkwerk
-import logging #to log errors
 
 #logging.WARNING for least info
 #logging.INFO for next amount
 #logging.DEBUG for verbose
 logging.basicConfig(filename='debug.log', filemode='w', level=logging.DEBUG)
 
-#PIL to read images (to get their dimensions)
-from PIL import Image
-
-def close_window():
-    root.destroy()
-    logging.info("GUI stopped")
-    exit()
 
 '''
+PSUEDO CODE
 scan_button runs scan_folder()
 scan_folder asks user for folder
 scan_folder gets file_list from folder
@@ -41,42 +48,44 @@ process_images spins up thread update_image_files with image_list and settings
 
 def scan_folder(): 
         logging.info("scan_folder function started")
-        global selected_directory #This is the directory we'll read
+        global selected_directory #This is the directory we'll read.
         global buttonProcessImages #buttonProcessImages.config(state=DISABLED/NORMAL)
-        global status #status bar text status.set("text")
+        global status #Update the statusb bar. Usage: status.set("text")
 
-        #get a working directory from filedialog
+        #Get a working directory from filedialog.
         selected_directory.set(filedialog.askdirectory())
 
-        if selected_directory.get() != '': #this is more for the 2nd time we select a folder
-            logging.info("We got this folder " + str(selected_directory.get()))
-
-#####STEP ONE#####
+        if selected_directory.get() != '':
+            ##################
+            #####STEP ONE#####
+            ##################
             status.set(F"Finding files in {selected_directory.get()}. This may take a moment.")
-
-            #Let the UI update.
             root.update_idletasks()
             
             #Get a list of files.
-            file_list = return_file_list_from_directory(selected_directory.get().replace('/','\\'))
-
-#####STEP TWO#####
-            #build out images_list with imagges & dimensions from the files
+            file_list = return_file_list_from_directory(selected_directory.get())
+            logging.info(len(file_list))
+            ##################
+            #####STEP TWO#####
+            ##################
+            #Build an images_list with images & dimensions from the files.
+            logging.debug("thread about to start")
             scan = threading.Thread(target=get_image_list_from_file_list(file_list))
             scan.start()
-
+            logging.debug("thread started")
             #start updating UI with percentage done of file scan. 
             #Unless we can offload this to the function?
             
         else:
-            #turn off the process image button
+            status.set("No folder was chosen. Please choose a folder.")
+            root.update_idletasks()
             buttonProcessImages.config(state=DISABLED)
         logging.info(selected_directory.get())
         logging.info("scan_folder function ended")
 
 def return_file_list_from_directory(folder):
     ##STEP ONE of scan
-    logging.info("find_files function started")
+    logging.info("return_file_list_from_directory function started")
     found_files = []
     dir_counter = 0
     p = Path(folder)
@@ -84,23 +93,24 @@ def return_file_list_from_directory(folder):
     for file in p.rglob("*"):
         if file.is_file():
             found_files.append(file)
-            logging.debug(F"Found file: {file}")
+            #logging.debug(F"Found file: {file}")
         if file.is_dir():
             dir_counter += 1
-    logging.info(F"file_files found {len(found_files)} files in {dir_counter} folder(s).")
-    logging.info("find_files function started ended")
+    logging.info(F"return_file_list_from_directory found {len(found_files)} files in {dir_counter} folder(s).")
+    logging.info("return_file_list_from_directory function started ended")
     return found_files
 
 # Check if a file is an image. If so, store the file path & image dimensions.
 def get_image_list_from_file_list(files_to_scan):
-    logging.info("scan_files_for_images_and_update_ui function started")
-    logging.debug(files_to_scan)
+    logging.info("get_image_list_from_file_list function started")
+    logging.debug(F"Reviewing {len(files_to_scan)} files")
 
     global status
     
     # Check if there are any files, if none stop.
     if len(files_to_scan) == 0 :
         status.set("There were no files to scan.")
+        root.update_idletasks()
         logging.info("There were no files to scan.")
     
     #refer to the image_list and clear it out
@@ -110,21 +120,21 @@ def get_image_list_from_file_list(files_to_scan):
     for file in files_to_scan:
         i =+ 1
         this_image = []
-        #this_image = (validate_image_dimensions(file))
         try:
-            img = Image.open(file)
+            img = Imagereader.open(file)
             width, height = img.size
             this_image.append(file)
             this_image.append(width)
             this_image.append(height)
             image_list.append(this_image)
             logging.debug(F"Found an image: {this_image}")
-        except:
+            img.close()
+        except UnidentifiedImageError as error:
             logging.debug(F"Not an image: {file}")
         if i % 50 == 0:
             status.set(F"Found {len(image_list)} images from {len(files_to_scan)} files.")
             root.update_idletasks()
-        img.close()
+        
 
     #prepare to update the Process Images button
     global buttonProcessImages
@@ -149,9 +159,8 @@ def turn_off_button_during_work():
     sleep(0.5)# a little pause to help multithreading be cool.
     work_happening = True
     while werkwerkwerk.work_happening:
-        sleep(1)
-        print(".", end=''),
-        #print(werkwerkwerk.work_happening)
+        sleep(0.5)
+        print(".", end='')
         status.set(werkwerkwerk.status_update_text)
         root.update_idletasks()
         pass
@@ -189,7 +198,10 @@ def return_image_config():
                 
                 "addCanvas":addCanvas.get(),
                 "stripExif":stripExif.get(),
-                "imageCompression":imageCompressionPercent.get(),
+
+                "imageCompression":imageCompression.get(),
+                "imageCompressionPercent":imageCompressionPercent.get(),
+
                 "convertJPG":convertJPG.get(),
                 "delOriginalFile":delOriginalFile.get(),
                 "keepPNGFile":keepPNGFile.get(),
@@ -415,7 +427,7 @@ if __name__ == "__main__":
     #Build a label: Status message
     global status
     status = StringVar()
-    status.set("Ready")
+    status.set("Please choose a folder.")
     #global labelStatus
     labelStatus = Label(status_bar, textvariable=status, 
         fg='green', bg='black', padx='10', font=("monospace",13))

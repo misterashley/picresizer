@@ -1,4 +1,5 @@
-import os, sys, subprocess, logging
+import subprocess, logging
+from pathlib import Path
 #from GUIgoodness import turn_off_button_during_work
 from time import sleep #to allow delays
 #import shutil
@@ -6,7 +7,7 @@ from PIL import Image
 from shutil import which
 
 si = subprocess.STARTUPINFO()
-si.dwFlags |= subprocess.STARTF_USESHOWWINDOW # this is to hide the command line
+#si.dwFlags |= subprocess.STARTF_USESHOWWINDOW # this is to hide the command line
 '''
 PSUEDO CODE FUN!
 for image in list_of_images:
@@ -105,24 +106,24 @@ for image in list_of_images:
 
 '''
 
-def get_stretch_dimensions(image_width, image_height, maximum_dimension):
-    if image_width > image_height: #Image width > height
+def get_max_dimensions(image_width, image_height, maximum_dimension):
+    if image_width > image_height:
         new_width = maximum_dimension
-        new_height = round(image_width/image_height*new_width)
-    else: #either height is the same or larger than width. either are okay
+        new_height = round(maximum_dimension/image_width*image_height)
+    else:
         new_height = maximum_dimension
-        new_width = round(image_width/image_height*new_height)
-    count("stretch") # update counter
+        new_width = round(maximum_dimension/image_height*image_width)
+    #count("stretch") # update counter
     return new_width, new_height
 
-def get_shrink_dimensions(image_width, image_height, minimum_dimension):
+def get_min_dimensions(image_width, image_height, minimum_dimension):
     if image_width > image_height:
         new_width = minimum_dimension
-        new_height = round(image_width/image_height*new_width)
+        new_height = round(minimum_dimension/image_width*image_height)
     else: #either height is the same or larger than width. either are okay.
         new_height = minimum_dimension
-        new_width = round(image_width/image_height*new_height)
-    count("shrink") # update counter
+        new_width = round(minimum_dimension/image_height*image_width)
+    #count("shrink") # update counter
     return new_width, new_height
 #if largest image dimension is neither larger than maxHeight, nor smaller than minHeight
 #then do not resize the image.
@@ -147,14 +148,16 @@ def process_images(settings, list_of_images):
     status_update_text = {}
     
     for image in list_of_images:
-        #setup stuff....
         flagstring = "" #this will build the arguements to be sent to imagemagick
         currentfilename = image[0]
-        file_without_extension, extension = os.path.splitext(currentfilename)
-        newfilename = file_without_extension + extension.lower()
+        logging.debug(80*"#")
+        logging.debug(image[0])
+        extension = image[0].suffix
+        file_without_extension = str(image[0])[:-len(extension)]
+        #file_without_extension, extension = os.path.splitext(currentfilename)
+        newfilename = Path(file_without_extension + extension)
         w,h = image[1],image[2] #width, height. defining now, but may be overwritten if the image need to be resized
         logging.debug(F"Image {currentfilename} with width, height: {image[1]}, {image[2]}")
-
         count("looked at") # how many images did we look at
 
         ################################
@@ -163,36 +166,30 @@ def process_images(settings, list_of_images):
         
 
         if settings.get('resizeMax') and settings.get('resizeMin'):
-            #check if either the largest image dimension is larger allowed
-            if max(image[1],image[2]) > settings.get('maxDimension'):
-                w,h = get_stretch_dimensions(image[1],image[2],settings.get('maxDimension'))
-                
-                flagstring = flagstring + F"-resize {w}x{h} " #resize string for imagemagick
+            #check if image is bigger than allowed
+            if max(w,h) > settings.get('maxDimension'):
+                w,h = get_max_dimensions(w,h,settings.get('maxDimension'))
+                flagstring = flagstring + F"-resize {w}x{h} "
 
-            #if not larger than max, then check if the image is smaller than the minimum
-            elif min(image[1],image[2]) > settings.get('minDimension'):
-                w,h = get_shrink_dimensions(image[1],image[2],settings.get('minDimension'))
-                
-                flagstring = flagstring + F"-resize {w}x{h} " #resize string for imagemagick
+            #if bigger, then check if image smaller than allowed
+            elif max(w,h) < settings.get('minDimension'):
+                w,h = get_min_dimensions(w,h,settings.get('minDimension'))
+                flagstring = flagstring + F"-resize {w}x{h} "
                 
             #if largest image dimension is neither larger than maxHeight, nor smaller than minHeight
             #then do not resize the image.
             else: pass
 
         elif settings.get('resizeMax'): #Only resizeMax
-            #check if the image is larger than maximum
-            if max(width,height) > settings.get('maxHeight'):
-                w,h = get_stretch_dimensions(image[1],image[2],settings.get('maxDimension'))
-            
-            flagstring = flagstring + F"-resize {w}x{h} " #resize string for imagemagick
+            #check if image is bigger than allowed
+            if max(w,h) > settings.get('maxDimension'):
+                w,h = get_max_dimensions(w,h,settings.get('maxDimension'))
+                flagstring = flagstring + F"-resize {w}x{h} "
 
-
-        elif settings[resizeMin]: #Only resizeMin
-            #check if the image is smaller than the minimum
-            if min(image[1],image[2]) > settings.get('minDimension'):
-                w,h = get_shrink_dimensions(image[1],image[2],settings.get('minDimension'))
-            
-            flagstring = flagstring + F"-resize {w}x{h} " #resize string for imagemagick
+        elif settings.get('resizeMin'): #Only resizeMin
+            if max(w,h) < settings.get('minDimension'):
+                w,h = get_min_dimensions(w,h,settings.get('minDimension'))
+                flagstring = flagstring + F"-resize {w}x{h} "
 
         else: #no resizing
             logging.debug("This image is in the Goldilocks zone.")
@@ -212,7 +209,7 @@ def process_images(settings, list_of_images):
                 pass #extension is built at the beginning of this function
 
             else:
-                newfilename = file_without_extension + ".jpg"
+                newfilename = Path(file_without_extension + ".jpg")
                 count("converted to jpg") # update counter
                 #file_without_extension is built at the beginning of this function
 
@@ -222,20 +219,27 @@ def process_images(settings, list_of_images):
             count("EXIF data stripped") # update counter
         
         if settings.get('imageCompression'):
-            logging.debug(F"quality set to {settings.get('imageCompression')}")
-            flagstring = flagstring +  F"-quality {settings.get('imageCompression')} "
+            logging.debug(F"quality set to {settings.get('imageCompressionPercent')}")
+            flagstring = flagstring +  F"-quality {settings.get('imageCompressionPercent')} "
             count("compressed") # update counter
         
         if flagstring != "":
-            executable = which('magick')
+            executable = Path(which('magick'))
             argument = []
             argument.append(executable)
             argument.append(currentfilename)
-            argument.append(flagstring)
+            argument.append(str(flagstring))
             argument.append(newfilename)
+            print(argument)
             go = subprocess.run(argument, startupinfo=si, shell=True, capture_output=True)
-            logging.debug(go.args) #the command
-            logging.debug(go.stderr) #what came back
+            #go = subprocess.run(argument, startupinfo=si, shell=True, capture_output=True)
+            logging.debug(F"Flagstring: {flagstring}")
+            logging.debug(F"Arguments: {go.args}") #the command
+            logging.debug(F"Rec'd: {go.stderr}") #what came back
+            logging.debug(F"Output: {go.stdout}")
+            logging.debug(F"Error: {go.stderr}")
+            logging.debug(F"Errorcode: {go.returncode}")
+            break
             '''
             argument is the command to run
             startupinfo=si is the stuff above which makes the command line screen not show up
