@@ -25,7 +25,7 @@ from shutil import which
 from sys import platform
 
 #This hides the command line from appearing & disappearing.
-if platform == "win32"
+if platform == "win32":
     si = subprocess.STARTUPINFO()
     si.dwFlags |= subprocess.STARTF_USESHOWWINDOW 
 
@@ -150,7 +150,7 @@ def process_images(settings, list_of_images):
             if platform == "win32":
                 argument = F'"{executable}" "{currentfilename}" {flagstring} "{newfilename}"'
             #testing for mac
-            elif platform == "darwin":
+            elif platform == "darwin" or platform == "linux":
                 argument.append(executable)
                 argument.append(currentfilename)
                 argument.append(flagstring)
