@@ -59,6 +59,31 @@ def count(action):
     else:
         status_update_text[action] = status_update_text[action] + 1
 
+def find_magick():
+    cmd = which("magick")
+    if not cmd:
+        cmd = which("convert")
+        if not cmd:
+            logging.info('Cannot find ImageMagick')
+            return
+    logging.info(F"Found: {cmd}")
+
+    if platform == "win32":
+        the_exe = subprocess.run(F"{cmd} -version", startupinfo=si, capture_output=True, text=True)
+        
+    elif platform == "linux" or platform == "darwin":
+        argument = list()
+        argument.append(cmd)
+        argument.append("--version")
+        the_exe = subprocess.run(argument, capture_output=True, text=True)
+
+    if the_exe.stdout.find("ImageMagick") > 0:
+        return cmd
+
+    else:
+        logging.info('Cannot find ImageMagick')
+        return
+
 def process_images(settings, list_of_images):
     logging.info(F"process_images started with {len(list_of_images)} images to change.")
     logging.info(settings)
