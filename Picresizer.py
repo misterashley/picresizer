@@ -153,11 +153,7 @@ def process_images(settings, list_of_images):
             
             #testing for mac
             elif platform == "darwin" or platform == "linux":
-                argument = []
-                argument.append(executable)
-                argument.append(currentfilename)
-                argument.append(flagstring)
-                argument.append(newfilename)
+                argument = F'{executable} "{currentfilename}" {flagstring} "{newfilename}"'
                 go = subprocess.run(argument, capture_output=True)
             
             '''
