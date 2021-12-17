@@ -149,13 +149,15 @@ def process_images(settings, list_of_images):
             executable = Path(which('magick'))
             if platform == "win32":
                 argument = F'"{executable}" "{currentfilename}" {flagstring} "{newfilename}"'
+                go = subprocess.run(argument, startupinfo=si, capture_output=True)
+            
             #testing for mac
             elif platform == "darwin" or platform == "linux":
                 argument.append(executable)
                 argument.append(currentfilename)
                 argument.append(flagstring)
                 argument.append(newfilename)
-            go = subprocess.run(argument, startupinfo=si, capture_output=True)
+                go = subprocess.run(argument, capture_output=True)
             
             '''
             go = subprocess.run(argument, startupinfo=si, shell=True, capture_output=True)
