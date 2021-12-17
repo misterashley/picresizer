@@ -43,3 +43,4 @@ Temporary Items
 .apdisk
 *.pyc
 example.log
+*.log

@@ -19,32 +19,151 @@ from tkinter import ttk
 from time import sleep
 import logging
 
-#this is part of this application.
-import werkwerkwerk
+import subprocess
+from shutil import which
 
-#logging.WARNING for least info
-#logging.INFO for next amount
-#logging.DEBUG for verbose
+#This hides the command line from appearing & disappearing.
+si = subprocess.STARTUPINFO()
+si.dwFlags |= subprocess.STARTF_USESHOWWINDOW 
+
+#logging.WARNING for least info, logging.INFO for more info, logging.DEBUG for most info.
 logging.basicConfig(filename='debug.log', filemode='w', level=logging.DEBUG)
 
+def get_max_dimensions(image_width, image_height, maximum_dimension):
+    if image_width > image_height:
+        new_width = maximum_dimension
+        new_height = round(maximum_dimension/image_width*image_height)
+    else:
+        new_height = maximum_dimension
+        new_width = round(maximum_dimension/image_height*image_width)
+    #count("stretch") # update counter
+    return new_width, new_height
 
-'''
-PSUEDO CODE
-scan_button runs scan_folder()
-scan_folder asks user for folder
-scan_folder gets file_list from folder
-scan_folder resets image_list
-scan_folder spins up thread_find_images with file_list
-    thread_find_images searches files_list for images found, populates global image_list
-    thread_find_images updates statusbar as it goes
-    thread_find_images reports when it is done
+def get_min_dimensions(image_width, image_height, minimum_dimension):
+    if image_width > image_height:
+        new_width = minimum_dimension
+        new_height = round(minimum_dimension/image_width*image_height)
+    else: #either height is the same or larger than width. either are okay.
+        new_height = minimum_dimension
+        new_width = round(minimum_dimension/image_height*image_width)
+    #count("shrink") # update counter
+    return new_width, new_height
 
-process_button runs process_images()
-process_images spins up thread update_image_files with image_list and settings
-    update_image_files starts modifying images in image_list using settings
-    update_image_files updates statsubar as it goes
-    update_image_files reports when it is done
-'''
+def count(action):
+    global status_update_text
+    if action not in status_update_text:
+        status_update_text[action] = 1
+    else:
+        status_update_text[action] = status_update_text[action] + 1
+
+def process_images(settings, list_of_images):
+    logging.info(F"process_images started with {len(list_of_images)} images to change.")
+    logging.info(settings)
+
+    global work_happening
+    work_happening = True #lets threading know that work is happening.
+
+    global status_update_text
+    status_update_text = {}
+    
+    for image in list_of_images:
+        flagstring = "" #this will build the arguements to be sent to imagemagick
+        currentfilename = image[0]
+        logging.debug(80*"#")
+        logging.debug(image[0])
+        extension = image[0].suffix
+        file_without_extension = str(image[0])[:-len(extension)]
+        #file_without_extension, extension = os.path.splitext(currentfilename)
+        newfilename = Path(file_without_extension + extension)
+        w,h = image[1],image[2] #width, height. defining now, but may be overwritten if the image need to be resized
+        logging.debug(F"Image {currentfilename} with width, height: {image[1]}, {image[2]}")
+        count("looked at") # how many images did we look at
+
+        ################################
+        # Figure out target image size #
+        ################################
+        
+
+        if settings.get('resizeMax') and settings.get('resizeMin'):
+            #check if image is bigger than allowed
+            if max(w,h) > settings.get('maxDimension'):
+                w,h = get_max_dimensions(w,h,settings.get('maxDimension'))
+                flagstring = flagstring + F"-resize {w}x{h} "
+
+            #if bigger, then check if image smaller than allowed
+            elif max(w,h) < settings.get('minDimension'):
+                w,h = get_min_dimensions(w,h,settings.get('minDimension'))
+                flagstring = flagstring + F"-resize {w}x{h} "
+                
+            #if largest image dimension is neither larger than maxHeight, nor smaller than minHeight
+            #then do not resize the image.
+            else: pass
+
+        elif settings.get('resizeMax'): #Only resizeMax
+            #check if image is bigger than allowed
+            if max(w,h) > settings.get('maxDimension'):
+                w,h = get_max_dimensions(w,h,settings.get('maxDimension'))
+                flagstring = flagstring + F"-resize {w}x{h} "
+
+        elif settings.get('resizeMin'): #Only resizeMin
+            if max(w,h) < settings.get('minDimension'):
+                w,h = get_min_dimensions(w,h,settings.get('minDimension'))
+                flagstring = flagstring + F"-resize {w}x{h} "
+
+        else: #no resizing
+            logging.debug("This image is in the Goldilocks zone.")
+
+        #Put a background on the image. A white background with a centered image.
+        if settings.get('addCanvas'):
+            logging.debug("addCanvas is true")
+            if w != h:
+                flagstring = flagstring + F"-gravity center -background white -extent {max(w,h)}x{max(w,h)} "
+                count("add background") # update counter
+                #extend the image to the maximum border, to make it a square.
+            
+            else: pass #the image is already square, or w and h are both undefined. :-/
+
+        if settings.get('convertJPG'): # convert to another jpg
+            if extension.lower() == ".jpg": 
+                pass #extension is built at the beginning of this function
+
+            else:
+                newfilename = Path(file_without_extension + ".jpg")
+                count("converted to jpg") # update counter
+                #file_without_extension is built at the beginning of this function
+
+        if settings.get('stripExif'):
+            logging.debug("stripping exif")
+            flagstring = flagstring + "-strip "
+            count("EXIF data stripped") # update counter
+        
+        if settings.get('imageCompression'):
+            logging.debug(F"quality set to {settings.get('imageCompressionPercent')}")
+            flagstring = flagstring +  F"-quality {settings.get('imageCompressionPercent')} "
+            count("compressed") # update counter
+        
+        if flagstring != "":
+            executable = Path(which('magick'))
+            argument = F'"{executable}" "{currentfilename}" {flagstring} "{newfilename}"'
+            go = subprocess.run(argument, startupinfo=si, capture_output=True)
+            '''
+            go = subprocess.run(argument, startupinfo=si, shell=True, capture_output=True)
+            argument is the command to run
+            startupinfo=si is the stuff above which makes the command line screen not show up
+            shell=True means the shell is run. I'll try to turn this off.
+            capture_output=True keeps the data from the output
+            '''
+            logging.debug(F"Flagstring: {flagstring}")
+            logging.debug(F"Arguments: {go.args}") #the command
+            logging.debug(F"Rec'd: {go.stderr}") #what came back
+            logging.debug(F"Output: {go.stdout}")
+            logging.debug(F"Error: {go.stderr}")
+            logging.debug(F"Errorcode: {go.returncode}")
+            if go.returncode:
+                logging.info(go.returncode)
+
+    work_happening = False #lets threading know that work is done.
+    logging.info("werwerkwerk.process_images ended")
 
 def scan_folder(): 
         logging.info("scan_folder function started")
@@ -100,8 +219,8 @@ def return_file_list_from_directory(folder):
     logging.info("return_file_list_from_directory function started ended")
     return found_files
 
-# Check if a file is an image. If so, store the file path & image dimensions.
 def get_image_list_from_file_list(files_to_scan):
+    # Check if a file is an image. If so, store the file path & image dimensions.
     logging.info("get_image_list_from_file_list function started")
     logging.debug(F"Reviewing {len(files_to_scan)} files")
 
@@ -158,13 +277,13 @@ def turn_off_button_during_work():
     buttonProcessImages.config(state=DISABLED)
     sleep(0.5)# a little pause to help multithreading be cool.
     work_happening = True
-    while werkwerkwerk.work_happening:
+    while work_happening:
         sleep(0.5)
         print(".", end='')
-        status.set(werkwerkwerk.status_update_text)
+        status.set(status_update_text)
         root.update_idletasks()
         pass
-    status.set("Finished. " + str(werkwerkwerk.status_update_text))
+    status.set("Finished. " + str(status_update_text))
     buttonProcessImages.config(state=NORMAL)
     root.update_idletasks()
     logging.info("turn_off_button_during_work function ended")
@@ -178,7 +297,7 @@ def process_images_and_update_ui():
 
     logging.info(F"The var was sent with {len(image_list)} entries.")
     user_interface = threading.Thread(target=turn_off_button_during_work)
-    work = threading.Thread(target=lambda: werkwerkwerk.process_images(imageConfig, image_list))
+    work = threading.Thread(target=lambda: process_images(imageConfig, image_list))
     user_interface.start()
     work.start()
     logging.info("process_images_and_update_ui function ended")
@@ -186,7 +305,7 @@ def process_images_and_update_ui():
 def return_image_config():
     logging.info("return_image_config function started")
     settings = {
-                "resizeMax":int(resizeMax.get()),#making these int to easy the comparisons for werkwerkwerk
+                "resizeMax":int(resizeMax.get()),
                 "maxWidth":int(maxWidth.get()),
                 "maxHeight":int(maxHeight.get()),
                 "maxDimension":int(max(maxWidth.get(), maxHeight.get())),
@@ -210,45 +329,6 @@ def return_image_config():
     logging.info(F"The settings are: {settings}")
     logging.info("return_image_config function ended")
     return settings
-
-
-## Reminders:
-## a variable with StringVar() can use .set("text") and .get() to retrieve its contents
-## a variable with Button() can use .config(state=DISABLED) or .config(state=NORMAL) 
-
-
-'''
-
-scan_n_plan comments
-
- scanNplan is part of version 2 of picresizer
- https://github.com/misterashley/picresizer
-
- Get a file selection (currently from config file, later from GUI)
-
- Get set of option to use, set these globally
-
- Pass the above to scanNplan, and build a VFO
-    (a list of verified files, with the options to work on)
-
- File selector
-   X Choose a folder
-       - Option to delve into subfolders
-
- Options (captured into a list called settings)
-   X Resize images
-   X Maximum desired output image dimension (Desired ratio is a function of max output)
-   X Minimum desired output image dimensions
-   X Canvas enabled
-   - Canvas colour ? (Hex value, colour wheel perhaps)
-   - Compression enabled / percent
-   X Strip EXIF data to shrink filesize
-   - Convert to .JPG
-       - Delete original image upon successful conversion
-   - Preserve .PNG images in that format
-   - Debug to console
-'''
-
 
 if __name__ == "__main__":
     #The GUI has been launched.
@@ -448,3 +528,7 @@ if __name__ == "__main__":
     work_happening = False
 
     root.mainloop()
+
+## Reminders:
+## a variable with StringVar() can use .set("text") and .get() to retrieve its contents
+## a variable with Button() can use .config(state=DISABLED) or .config(state=NORMAL) 

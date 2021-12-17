@@ -7,3 +7,8 @@
 3. Install Pillow.
 	-From a terminal install Pillow with pip:
 	pip install Pillow
+
+
+With python 3.8 (or maybe even 3.5?) you from a command line run 
+
+python picresizer.py
