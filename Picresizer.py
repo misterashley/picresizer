@@ -272,18 +272,16 @@ def get_image_list_from_file_list(files_to_scan):
     logging.info("get_image_list_from_file_list function ended")
 
 def turn_off_button_during_work():
-    #global work_happening I don't think this does what I want it to do
     logging.info("turn_off_button_during_work function started")
     buttonProcessImages.config(state=DISABLED)
-    sleep(0.5)# a little pause to help multithreading be cool.
+    #sleep(0.5)# a little pause to help multithreading be cool.
     work_happening = True
     while work_happening:
         sleep(0.5)
-        print(".", end='')
+        #print(".", end='')
         status.set(status_update_text)
         root.update_idletasks()
-        pass
-    status.set("Finished. " + str(status_update_text))
+    status.set(F"Finished. {status_update_text}")
     buttonProcessImages.config(state=NORMAL)
     root.update_idletasks()
     logging.info("turn_off_button_during_work function ended")
@@ -306,14 +304,10 @@ def return_image_config():
     logging.info("return_image_config function started")
     settings = {
                 "resizeMax":int(resizeMax.get()),
-                "maxWidth":int(maxWidth.get()),
-                "maxHeight":int(maxHeight.get()),
-                "maxDimension":int(max(maxWidth.get(), maxHeight.get())),
+                "maxDimension":int(maxDimension.get()),
                 
                 "resizeMin":int(resizeMin.get()),
-                "minWidth":int(minWidth.get()),
-                "minHeight":int(minHeight.get()),
-                "minDimension":int(min(minWidth.get(),minHeight.get())),
+                "minDimension":int(minDimension.get()),
                 
                 "addCanvas":addCanvas.get(),
                 "stripExif":stripExif.get(),
@@ -330,6 +324,11 @@ def return_image_config():
     logging.info("return_image_config function ended")
     return settings
 
+def validate_settings():
+    #start building out some rules for how settings are checked.
+    if 10000 <= number <= 30000:
+        pass
+
 if __name__ == "__main__":
     #The GUI has been launched.
     logging.info("GUI launched.")
@@ -339,7 +338,7 @@ if __name__ == "__main__":
     root = Tk()
     root.title("picResizer by misterashley")
     root.configure(background="white")
-    root.geometry('800x600')
+    root.geometry('800x450')
 
     # The main part of the window
     main = Frame(root, bg='white')
@@ -380,115 +379,84 @@ if __name__ == "__main__":
     #  Maximum dimensions                  #
     ########################################
     resizeMax = IntVar()
-    resizeMax.set(1) #enable by default
-    resizeImageBox = Checkbutton(main, text="Shrink images to maximum", variable=resizeMax)
-    resizeImageBox.grid(row=3, column=0, rowspan=2)#.pack(padx=10, anchor='w')
-
-    maxHeightLabel = Label(main, text="Max Height")
-    maxHeightLabel.grid(row=3, column=1)
+    resizeMax.set(1) #0 for unchecked, 1 for checked.
+    resizeImageBox = Checkbutton(main, text="Shrink images if either dimension is bigger than (in pixels):", background='white', variable=resizeMax)
+    resizeImageBox.grid(row=3, column=0, sticky=W, padx=5)
 
     #Build an entry box: Max Dimension for Height
-    maxHeight = Entry(main, width=10)
-    maxHeight.grid(row=4, column=1)#.pack(padx=10, pady=10, anchor='w')
-    maxHeight.insert(0, 1000)
-    #maxHeight.get() will give you the text supplied in the entry box... it will not Entry is unique apparent. How fucking stupid.
-
-    maxWidthLabel = Label(main, text="Max Width")
-    maxWidthLabel.grid(row=3, column=2)
-
-    #Build an entry box: Max Dimension for Width
-    maxWidth = Entry(main, width=10, text="Maximum width of images" )
-    maxWidth.grid(row=4, column=2)#.pack(padx=10, pady=10, anchor='w')
-    maxWidth.insert(0, 1000)
-    #maxHeight.get() will give you the text supplied in the entry box.
+    maxDimension = Entry(main, width=10)
+    maxDimension.grid(row=3, column=1)
+    maxDimension.insert(0, 1000)
+    #maxDimension.get() will give you the text supplied in the entry box... it will not Entry is unique apparent. How fucking stupid.
 
     ########################################
-    #  Minimum dimensions.                 #
+    #  Minimum dimensions                  #
     ########################################
     #Build a checkbox: Stretch image to at least minimum size
     resizeMin = IntVar()
-    resizeMin.set(1) #enable by default
-    resizeImageBox = Checkbutton(main, text="Stretch images to minimum", variable=resizeMin)
-    resizeImageBox.grid(row=5, column=0, rowspan=2)#.pack(padx=10, anchor='w')
-
-    minHeightLabel = Label(main, text="Min Height")
-    minHeightLabel.grid(row=5, column=1)
+    resizeMin.set(1) #0 for unchecked, 1 for checked.
+    resizeImageBox = Checkbutton(main, text="Stretch images if either dimension is smaller than (in pixels):", background='white', variable=resizeMin)
+    resizeImageBox.grid(row=4, column=0, sticky=W, padx=5)
 
     #Build an entry box: Min Dimension for Height
-    minHeight = Entry(main, width=10)
-    minHeight.grid(row=6, column=1)#.pack(padx=10, pady=10, anchor='w')
-    minHeight.insert(0,400)
-    #minHeight.get() will give you the text supplied in the entry box... it will not Entry is unique apparent. How fucking stupid.
-
-    minWidthLabel = Label(main, text="Min Width")
-    minWidthLabel.grid(row=5, column=2)
-
-    #Build an entry box: Minimum Dimension for Width
-    minWidth = Entry(main, width=10)
-    minWidth.grid(row=6, column=2)#.pack(padx=10, pady=10, anchor='w')
-    minWidth.insert(0, 400)
-    #minWidth.get() will give you the text supplied in the entry box.
+    minDimension = Entry(main, width=10)
+    minDimension.grid(row=4, column=1)
+    minDimension.insert(0,400)
+    #minDimension.get() will give you the text supplied in the entry box... it will not Entry is unique apparent. How fucking stupid.
 
     ########################################
     #  Other options.                      #
     ########################################
 
-    #Build a checkbox: Convert images to .JPG
-    convertJPG = IntVar() #0 for unchecked, 1 for checked.
-    convertJPG.set(1) #enable by default
-    convertJPGBox = Checkbutton(main, text="Convert images to .JPG", variable=convertJPG)
-    convertJPGBox.grid(row=9, column=0, sticky=W, padx=5)#.pack(padx=10, anchor='w')
-
     imageCompression = IntVar() # 0-100 percentage.
-    imageCompression.set(1)
-    imageCompressionBox = Checkbutton(main, text="Compress images", variable=imageCompression)
-    imageCompressionBox.grid(row=10, column=0, rowspan=2, sticky=W, padx=5)
-
-    imageCompressionLabel = Label(main, text="%100 is highest quality, \n but least compression \n (0 to 100)")
-    imageCompressionLabel.grid(row=10, column=1, columnspan=2)
+    imageCompression.set(1) #0 for unchecked, 1 for checked.
+    imageCompressionBox = Checkbutton(main, text="Compress image. (0-100%, higher is clearer image)", background='white', variable=imageCompression)
+    imageCompressionBox.grid(row=5, column=0, sticky=W, padx=5)
 
     imageCompressionPercent = Entry(main, width=5)
     imageCompressionPercent.insert(0,100)
-    imageCompressionPercent.grid(row=11, column=1)
+    imageCompressionPercent.grid(row=5, column=1)
 
     #Build a checkbox: Add canvas to reshape image dimensions
     addCanvas = IntVar() #0 for unchecked, 1 for checked.
     addCanvas.set(1) #enable by default
-    addCanvasBox = Checkbutton(main, text="Add a white canvas to images", variable=addCanvas)
-    addCanvasBox.grid(row=12, column=0, sticky=W, padx=5)#.pack(padx=10, anchor='w')
+    addCanvasBox = Checkbutton(main, text="Add a white canvas to images", background='white', variable=addCanvas)
+    addCanvasBox.grid(row=6, column=0, sticky=W, padx=5)#.pack(padx=10, anchor='w')
 
     #Build a checkbox: Strip EXIF from JPEG or PNG
     stripExif = IntVar()
     stripExif.set(1) #enable by default
-    stripExifBox = Checkbutton(main, text="Strip EXIF info from images", variable=stripExif)
-    stripExifBox.grid(row=13, column=0, sticky=W, padx=5)#.pack(padx=10, anchor='w')
+    stripExifBox = Checkbutton(main, text="Strip EXIF info from images", background='white', variable=stripExif)
+    stripExifBox.grid(row=7, column=0, sticky=W, padx=5)#.pack(padx=10, anchor='w')
+
+    #Build a checkbox: Convert images to .JPG
+    convertJPG = IntVar() #0 for unchecked, 1 for checked.
+    convertJPG.set(1) #enable by default
+    convertJPGBox = Checkbutton(main, text="Convert images to .JPG", background='white', variable=convertJPG)
+    convertJPGBox.grid(row=8, column=0, sticky=W, padx=5)
 
     #Build a checkbox: Delete original file if conversion is successful
     delOriginalFile = IntVar() #0 for unchecked, 1 for checked.
     delOriginalFile.set(1) #enable by default
-    delOriginalFileBox = Checkbutton(main, text="Delete original file if conversion is successful", variable=delOriginalFile)
-    delOriginalFileBox.grid(row=14, column=0, sticky=W, padx=5)#.pack(padx=10, anchor='w')
+    delOriginalFileBox = Checkbutton(main, text="Delete original file if conversion is successful", background='white', variable=delOriginalFile)
+    delOriginalFileBox.grid(row=9, column=0, sticky=W, padx=5)#.pack(padx=10, anchor='w')
 
     #Build a checkbox: Preserve PNG files
     keepPNGFile = IntVar() #0 for unchecked, 1 for checked.
     keepPNGFile.set(0) #enable by default
-    keepPNGFileBox = Checkbutton(main, text="But, don't delete if the file is a .PNG", variable=keepPNGFile)
-    keepPNGFileBox.grid(row=15, column=0, sticky=W, padx=30)#.pack(padx=10, anchor='w')
-
+    keepPNGFileBox = Checkbutton(main, text="But, don't delete if the file is a .PNG", background='white', variable=keepPNGFile)
+    keepPNGFileBox.grid(row=10, column=0, sticky=W, padx=30)#.pack(padx=10, anchor='w')
 
     debuggingLabel = Label(main, 
-        text="""Debugging log file.
-        Set to WARNING for least info.
-        Set to DEBUG for most info.
-        {}""".format("some text"), anchor=W)
-    debuggingLabel.grid(row=16, column=0, padx=5, pady=20,sticky=W)
+        text="Debugging log file. (WARNING least info ... DEBUG most info.)", background='white', anchor=W)
+    debuggingLabel.grid(row=11, column=0, padx=5, pady=5, sticky=W)
 
     #List drop down (rather than Checkbox) for reporting (debugging)
     debuggingLevel = ["WARNING","INFO","DEBUG"]
     debuggingMenu = ttk.Combobox(main, value=debuggingLevel)#
     debuggingMenu.current(0) #WARNING by default
     debuggingMenu['state'] = 'readonly' #Don't allow other options to be entered
-    debuggingMenu.grid(row=16, column=1)
+    debuggingMenu.grid(row=11, column=1)
 
     ########################################
     #  Modify image files button.          #
@@ -497,8 +465,7 @@ if __name__ == "__main__":
     global buttonProcessImages
     buttonProcessImages = Button(main, text="No images selected", 
         width=20, command=process_images_and_update_ui, state=DISABLED)
-    buttonProcessImages.grid(row=20, column=0, sticky=E, padx=60, pady=20)#.pack(anchor='e', pady=20, padx=20)
-    #turn off the Process Images buton.
+    buttonProcessImages.grid(row=20, column=0, sticky=E, padx=60, pady=20)
 
     ########################################
     #  Status bar.                         #
@@ -509,8 +476,7 @@ if __name__ == "__main__":
     status = StringVar()
     status.set("Please choose a folder.")
     #global labelStatus
-    labelStatus = Label(status_bar, textvariable=status, 
-        fg='green', bg='black', padx='10', font=("monospace",13))
+    labelStatus = Label(status_bar, textvariable=status, fg='green', bg='black', padx='10', font=("monospace",11))
     labelStatus.pack(expand='True', anchor=SE)
     #print(dir(labelStatus))
     #labelStatus.pack(status_bar, expand='True', anchor='se')
