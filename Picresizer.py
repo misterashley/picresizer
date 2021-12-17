@@ -153,6 +153,7 @@ def process_images(settings, list_of_images):
             
             #testing for mac
             elif platform == "darwin" or platform == "linux":
+                argument = []
                 argument.append(executable)
                 argument.append(currentfilename)
                 argument.append(flagstring)
