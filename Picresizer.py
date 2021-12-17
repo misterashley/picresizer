@@ -22,9 +22,12 @@ import logging
 import subprocess
 from shutil import which
 
+from sys import platform
+
 #This hides the command line from appearing & disappearing.
-si = subprocess.STARTUPINFO()
-si.dwFlags |= subprocess.STARTF_USESHOWWINDOW 
+if platform == "win32"
+    si = subprocess.STARTUPINFO()
+    si.dwFlags |= subprocess.STARTF_USESHOWWINDOW 
 
 #logging.WARNING for least info, logging.INFO for more info, logging.DEBUG for most info.
 logging.basicConfig(filename='debug.log', filemode='w', level=logging.DEBUG)
