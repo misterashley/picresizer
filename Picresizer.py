@@ -369,11 +369,11 @@ if __name__ == "__main__":
     #global labelInstructions
     labelInstructions = Label(main, textvariable=instructions, 
         justify='left', bg="white", fg="black", font=("Helvetica",10))
-    labelInstructions.grid(row=0, column=0, columnspan=5)#, 'anchor='w')
+    labelInstructions.grid(row=0, column=0, columnspan=2, sticky=W, padx=5)
 
     #Build the choose a folder button. This direction is meant to have images. We'll scan subdirectories as well.
     buttonChoose = Button(main, text ="Select a folder to scan", width=20, command=scan_folder)
-    buttonChoose.grid(row=1, column=0)#.pack(pady=10)
+    buttonChoose.grid(row=0, column=1, padx=5)#.pack(pady=10)
 
     #Initialize selected_directory
     global selected_directory
@@ -383,7 +383,7 @@ if __name__ == "__main__":
     #global labelPath
     labelPath = Label (main, textvariable=str(selected_directory), 
         bg="white", fg="blue", font=("monospace", 10))
-    labelPath.grid(row=2, column=0, columnspan=5)#.pack()
+    labelPath.grid(row=1, column=0, columnspan=2)#.pack()
 
     ########################################
     #  Maximum dimensions                  #
@@ -391,11 +391,11 @@ if __name__ == "__main__":
     resizeMax = IntVar()
     resizeMax.set(1) #0 for unchecked, 1 for checked.
     resizeImageBox = Checkbutton(main, text="Shrink images if either dimension is bigger than (in pixels):", background='white', variable=resizeMax)
-    resizeImageBox.grid(row=3, column=0, sticky=W, padx=5)
+    resizeImageBox.grid(row=2, column=0, sticky=W, padx=5)
 
     #Build an entry box: Max Dimension for Height
     maxDimension = Entry(main, width=10)
-    maxDimension.grid(row=3, column=1)
+    maxDimension.grid(row=2, column=1, sticky=W, padx=5)
     maxDimension.insert(0, 1000)
     #maxDimension.get() will give you the text supplied in the entry box... it will not Entry is unique apparent. How fucking stupid.
 
@@ -410,7 +410,7 @@ if __name__ == "__main__":
 
     #Build an entry box: Min Dimension for Height
     minDimension = Entry(main, width=10)
-    minDimension.grid(row=4, column=1)
+    minDimension.grid(row=4, column=1, sticky=W, padx=5)
     minDimension.insert(0,400)
     #minDimension.get() will give you the text supplied in the entry box... it will not Entry is unique apparent. How fucking stupid.
 
@@ -425,7 +425,7 @@ if __name__ == "__main__":
 
     imageCompressionPercent = Entry(main, width=5)
     imageCompressionPercent.insert(0,100)
-    imageCompressionPercent.grid(row=5, column=1)
+    imageCompressionPercent.grid(row=5, column=1, sticky=W, padx=5)
 
     #Build a checkbox: Add canvas to reshape image dimensions
     addCanvas = IntVar() #0 for unchecked, 1 for checked.
@@ -475,7 +475,7 @@ if __name__ == "__main__":
     global buttonProcessImages
     buttonProcessImages = Button(main, text="No images selected", 
         width=20, command=process_images_and_update_ui, state=DISABLED)
-    buttonProcessImages.grid(row=20, column=0, sticky=E, padx=60, pady=20)
+    buttonProcessImages.grid(row=12, column=1, sticky=E, pady=20)
 
     ########################################
     #  Status bar.                         #
