@@ -415,7 +415,7 @@ if __name__ == "__main__":
     ########################################
     resizeMax = IntVar()
     resizeMax.set(1) #0 for unchecked, 1 for checked.
-    resizeImageBox = Checkbutton(main, text="Shrink images if either dimension is bigger than (in pixels):", background='white', variable=resizeMax)
+    resizeImageBox = Checkbutton(main, text="Shrink image if width or height is greater than(pixels):", background='white', variable=resizeMax)
     resizeImageBox.grid(row=2, column=0, sticky=W, padx=5)
 
     #Build an entry box: Max Dimension for Height
@@ -430,7 +430,7 @@ if __name__ == "__main__":
     #Build a checkbox: Stretch image to at least minimum size
     resizeMin = IntVar()
     resizeMin.set(1) #0 for unchecked, 1 for checked.
-    resizeImageBox = Checkbutton(main, text="Stretch images if either dimension is smaller than (in pixels):", background='white', variable=resizeMin)
+    resizeImageBox = Checkbutton(main, text="Stretch image if width or height is smaller than(pixels):", background='white', variable=resizeMin)
     resizeImageBox.grid(row=4, column=0, sticky=W, padx=5)
 
     #Build an entry box: Min Dimension for Height
@@ -454,14 +454,14 @@ if __name__ == "__main__":
 
     #Build a checkbox: Add canvas to reshape image dimensions
     addCanvas = IntVar() #0 for unchecked, 1 for checked.
-    addCanvas.set(1) #enable by default
-    addCanvasBox = Checkbutton(main, text="Add a white canvas to images", background='white', variable=addCanvas)
+    addCanvas.set(1) #enable by defaults
+    addCanvasBox = Checkbutton(main, text="Square image with a white background", background='white', variable=addCanvas)
     addCanvasBox.grid(row=6, column=0, sticky=W, padx=5)#.pack(padx=10, anchor='w')
 
     #Build a checkbox: Strip EXIF from JPEG or PNG
     stripExif = IntVar()
     stripExif.set(1) #enable by default
-    stripExifBox = Checkbutton(main, text="Strip EXIF info from images", background='white', variable=stripExif)
+    stripExifBox = Checkbutton(main, text="Remove EXIF info from images, to reduce filesize", background='white', variable=stripExif)
     stripExifBox.grid(row=7, column=0, sticky=W, padx=5)#.pack(padx=10, anchor='w')
 
     #Build a checkbox: Convert images to .JPG
@@ -473,7 +473,7 @@ if __name__ == "__main__":
     #Build a checkbox: Delete original file if conversion is successful
     delOriginalFile = IntVar() #0 for unchecked, 1 for checked.
     delOriginalFile.set(1) #enable by default
-    delOriginalFileBox = Checkbutton(main, text="Delete original file if conversion is successful", background='white', variable=delOriginalFile)
+    delOriginalFileBox = Checkbutton(main, text="Delete original file if .jpg created successfully", background='white', variable=delOriginalFile)
     delOriginalFileBox.grid(row=9, column=0, sticky=W, padx=5)#.pack(padx=10, anchor='w')
 
     #Build a checkbox: Preserve PNG files
